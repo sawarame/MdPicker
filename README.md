@@ -1,54 +1,56 @@
 # MdPicker
 
-**MdPicker** は、ブラウザ上のリンクや選択したテキストを、右クリックから簡単な操作で Markdown 形式に変換しクリップボードにコピーできる、シンプルで強力な Chrome 拡張機能です。
+*[日本語で読む (Read this in Japanese)](./README.ja.md)*
 
-## ✨ 主な機能
-- **右クリックから一発コピー**: リンクの上で右クリックして「Copy Link as Markdown」を選ぶだけで、自動的に Markdown フォーマットを作成します。
-- **選択範囲のMarkdown変換**: Webページ上の任意のテキスト（見出し、太字、リスト等を含む）を選択して右クリックから「Copy selection as Markdown」を選ぶと、元のHTMLタグ（見た目）を解析し、Markdown記法へと自動変換します。
-- **リンクテキストの自動取得**: 単なる URL だけでなく、Web ページ上のアンカーテキスト（リンクに設定されている表示名）も正確に抽出して組み込みます。
-- **Manifest V3 完全対応**: 最新の Chrome 拡張機能アーキテクチャに準拠しており、バックグラウンドでの軽快な動作と強固なセキュリティ（Service Worker、Offscreen API等）を実現しています。
+**MdPicker** is a simple yet powerful Chrome extension that allows you to convert links and selected text on your browser into Markdown format and copy them directly to your clipboard using the right-click context menu.
 
-## 🎯 使い方
+## ✨ Features
+- **One-Click Copy**: Simply right-click on a link and select "Copy Link as Markdown" to automatically create a Markdown format.
+- **Copy Selection as Markdown**: Select any text on a web page (including headings, bold text, lists, etc.), right-click, and select "Copy selection as Markdown" to automatically convert its visual HTML structure into Markdown syntax.
+- **Automatic Link Text Extraction**: Accurately extracts not just the URL, but also the anchor text (the display name set for the link) from the web page.
+- **Manifest V3 Fully Supported**: Complies with the latest Chrome extension architecture, ensuring lightweight background operation and robust security features (via Service Workers, Offscreen API, etc.).
 
-### 🔗 リンクのコピー
-1. Web ページを開きます。
-2. コピーしたいリンク（`<a>`タグで囲まれた文字列等）の上にマウスカーソルを合わせます。
-3. **右クリック**し、コンテキストメニューから **「Copy Link as Markdown」** を選択します。
-4. クリップボードに `[取得されたテキスト](https://example.com...)` のような Markdown 文字列が格納されます。エディタやメモ帳にそのまま貼り付けて(`Ctrl+V` / `Cmd+V`) 使用してください。
+## 🎯 Usage
 
-### 📝 選択範囲のコピー
-1. Webページ上でコピーしたい部分（テキスト、複数行、箇条書きなど）をドラッグして選択します。
-2. 選択範囲の上で **右クリック** し、**「Copy selection as Markdown」** を選択します。
-3. クリップボードに `# 見出し` や `- リスト` などの変換済み Markdown 文字列が格納されます。
+### 🔗 Copying Links
+1. Open any web page.
+2. Hover your mouse cursor over the link you want to copy (e.g., text wrapped in an `<a>` tag).
+3. **Right-click** and select **"Copy Link as Markdown"** from the context menu.
+4. A Markdown string like `[Extracted Text](https://example.com...)` will be saved to your clipboard. You can paste it (`Ctrl+V` / `Cmd+V`) directly into your editor or notepad app.
 
-## 📦 インストール方法（開発者モード）
-現在本拡張機能は開発中のため、Chrome の拡張機能管理画面から手動で読み込む必要があります。
+### 📝 Copying Selections
+1. Drag to select the text you want to copy (paragraphs, bullet points, multiple lines, etc.) on the webpage.
+2. **Right-click** on the selected area and choose **"Copy selection as Markdown"**.
+3. The converted Markdown string (e.g., `# Heading` or `- List`) will be saved to your clipboard securely preserving the original HTML tag formats.
 
-1. このリポジトリをダウンロード（またはクローン）し、手元の開発環境に配置します。
-2. ターミナルで配置したディレクトリを開き、パッケージをビルドします：
+## 📦 Installation (Developer Mode)
+Since this extension is currently under development, you will need to load it manually from Chrome's extension management page.
+
+1. Download (or clone) this repository to your local development environment.
+2. Open the directory in your terminal and build the package:
    ```bash
    npm install
    npm run build
    ```
-3. Chrome を開き、URL ボックスに `chrome://extensions/` と入力して拡張機能管理画面を開きます。
-4. 画面右上の **「デベロッパー モード」** のトグルスイッチを **オン(有効)** にします。
-5. 画面左上の **「パッケージ化されていない拡張機能を読み込む」** をクリックします。
-6. ビルド出力ディレクトリである `MdPicker/MdPicker` （直下に `manifest.json` のあるフォルダ！）を選択します。
-7. インストール完了です。ブラウザのアドレスバー横に拡張機能のアイコンが追加されていることを確認できます。
+3. Open Chrome and enter `chrome://extensions/` in the URL bar to open the extensions management page.
+4. Turn **ON** the **"Developer mode"** toggle switch in the upper right corner of the screen.
+5. Click **"Load unpacked"** in the upper left corner.
+6. Select the `MdPicker/MdPicker` directory (it MUST be the folder containing `manifest.json` inside it).
+7. Installation is complete. You can verify this by checking that the MdPicker icon has been added next to your browser's address bar.
 
-## 🛠️ 開発（Development）
+## 🛠️ Development
 
-本プロジェクトは **TypeScript** と **Webpack** を使用してビルドされています。
+This project uses **TypeScript** and **Webpack** for the build process.
 
 ```bash
-# 依存するパッケージのインストール
+# Install dependencies
 npm install
 
-# 本番用のビルド（コードを最小化して出力）
+# Production build (outputs minified code and zip release)
 npm run build
 
-# 開発用の監視ビルド（コード変更のたびに自動ビルド）
+# Development watch build (automatically rebuilds on code changes)
 npm run dev
 ```
 
-詳細な技術アーキテクチャやルール設定は `SPEC.md` および `GEMINI.md` をご参照ください。
+For detailed technical architecture and rules, please refer to `SPEC.md` and `GEMINI.md` within this repository.
