@@ -5,6 +5,7 @@ yarn-error.log
 
 # Build output
 MdPicker/js/
+MdPicker.zip
 
 # macOS system files
 .DS_Store
