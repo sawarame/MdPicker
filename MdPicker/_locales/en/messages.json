@@ -6,5 +6,9 @@
   "appDesc": {
     "message": "Copy links as Markdown format directly from context menu.",
     "description": "The description of the extension."
+  },
+  "contextMenuTitle": {
+    "message": "Copy as Markdown",
+    "description": "Title for the context menu item."
   }
 }

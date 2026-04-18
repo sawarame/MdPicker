@@ -6,5 +6,9 @@
   "appDesc": {
     "message": "Markdown形式でリンクをコピーします。",
     "description": "拡張機能の説明。"
+  },
+  "contextMenuTitle": {
+    "message": "Markdownとしてコピー",
+    "description": "コンテキストメニューの項目名。"
   }
 }

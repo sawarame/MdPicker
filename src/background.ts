@@ -1,7 +1,7 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "copy-as-markdown",
-    title: "Copy as Markdown",
+    title: chrome.i18n.getMessage("contextMenuTitle"),
     contexts: ["link"]
   });
 });
