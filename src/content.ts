@@ -1,4 +1,6 @@
 import TurndownService from 'turndown';
+// @ts-ignore
+import { tables } from 'turndown-plugin-gfm';
 
 let lastClickedLinkText = "";
 let lastSelectedMarkdown = "";
@@ -9,6 +11,7 @@ const turndownService = new TurndownService({
   bulletListMarker: '-',
   codeBlockStyle: 'fenced'
 });
+turndownService.use(tables);
 
 function extractLinkText(link: HTMLAnchorElement): string {
   // innerText retrieves visually rendered text and ignores hidden elements
@@ -68,7 +71,11 @@ document.addEventListener("contextmenu", (e) => {
       node = node.parentNode;
     }
 
-    const tagsToWrap = new Set(['B', 'STRONG', 'I', 'EM', 'MARK', 'DEL', 'S', 'U', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'A', 'CODE', 'PRE']);
+    const tagsToWrap = new Set([
+      'B', 'STRONG', 'I', 'EM', 'MARK', 'DEL', 'S', 'U', 
+      'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'A', 'CODE', 'PRE',
+      'TD', 'TH', 'TR', 'THEAD', 'TBODY', 'TFOOT', 'CAPTION'
+    ]);
     
     while (node && node !== document.body && node instanceof Element) {
       const tagName = node.tagName.toUpperCase();
@@ -78,8 +85,8 @@ document.addEventListener("contextmenu", (e) => {
         html = wrapper.outerHTML;
       }
       
-      // If we reach a list container, wrap once more and stop to prevent over-wrapping
-      if (['UL', 'OL'].includes(tagName)) {
+      // If we reach a list container or table, wrap once more and stop to prevent over-wrapping
+      if (['UL', 'OL', 'TABLE'].includes(tagName)) {
         const wrapper = node.cloneNode(false) as Element;
         wrapper.innerHTML = html;
         html = wrapper.outerHTML;
