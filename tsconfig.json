@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./MdPicker/js",
+    "rootDir": "./src",
+    "types": ["chrome"]
+  },
+  "include": ["src/**/*"]
+}
