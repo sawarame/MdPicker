@@ -8,7 +8,11 @@
     "description": "The description of the extension."
   },
   "contextMenuTitle": {
-    "message": "Copy as Markdown",
+    "message": "Copy Link as Markdown",
     "description": "Title for the context menu item."
+  },
+  "contextMenuSelection": {
+    "message": "Copy selection as Markdown",
+    "description": "Title for the selection context menu item."
   }
 }

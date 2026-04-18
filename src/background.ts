@@ -4,6 +4,12 @@ chrome.runtime.onInstalled.addListener(() => {
     title: chrome.i18n.getMessage("contextMenuTitle"),
     contexts: ["link"]
   });
+
+  chrome.contextMenus.create({
+    id: "copy-selection-as-markdown",
+    title: chrome.i18n.getMessage("contextMenuSelection"),
+    contexts: ["selection"]
+  });
 });
 
 async function setupOffscreenDocument(path: string) {
@@ -41,17 +47,35 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
 
     const markdownStr = `[${linkText}](${info.linkUrl})`;
+    await writeToOffscreenClipboard(markdownStr);
+  } else if (info.menuItemId === "copy-selection-as-markdown") {
+    let markdownStr = info.selectionText || "";
 
-    try {
-      await setupOffscreenDocument('offscreen.html');
-      await chrome.runtime.sendMessage({
-        type: 'copy-text-to-clipboard',
-        target: 'offscreen',
-        data: markdownStr
-      });
-      console.log('Markdown copied to clipboard successfully');
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+    if (tab && tab.id) {
+      try {
+        const response = await chrome.tabs.sendMessage(tab.id, { type: "GET_LAST_SELECTION_MARKDOWN" });
+        if (response && response.markdown) {
+          markdownStr = response.markdown;
+        }
+      } catch (err) {
+        console.warn("Could not get markdown from content script. Using fallback text.", err);
+      }
     }
+
+    await writeToOffscreenClipboard(markdownStr);
   }
 });
+
+async function writeToOffscreenClipboard(text: string) {
+  try {
+    await setupOffscreenDocument('offscreen.html');
+    await chrome.runtime.sendMessage({
+      type: 'copy-text-to-clipboard',
+      target: 'offscreen',
+      data: text
+    });
+    console.log('Markdown copied to clipboard successfully');
+  } catch (err) {
+    console.error('Failed to copy to clipboard:', err);
+  }
+}

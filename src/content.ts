@@ -1,4 +1,14 @@
+import TurndownService from 'turndown';
+
 let lastClickedLinkText = "";
+let lastSelectedMarkdown = "";
+
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  hr: '---',
+  bulletListMarker: '-',
+  codeBlockStyle: 'fenced'
+});
 
 function extractLinkText(link: HTMLAnchorElement): string {
   // innerText retrieves visually rendered text and ignores hidden elements
@@ -42,10 +52,61 @@ document.addEventListener("contextmenu", (e) => {
   if (link) {
     lastClickedLinkText = extractLinkText(link);
   }
+
+  // Handle generalized text selection
+  lastSelectedMarkdown = "";
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+    const range = selection.getRangeAt(0);
+    const div = document.createElement('div');
+    div.appendChild(range.cloneContents());
+    
+    let html = div.innerHTML;
+    let node: Node | null = range.commonAncestorContainer;
+    
+    if (node && node.nodeType === Node.TEXT_NODE) {
+      node = node.parentNode;
+    }
+
+    const tagsToWrap = new Set(['B', 'STRONG', 'I', 'EM', 'MARK', 'DEL', 'S', 'U', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'A', 'CODE', 'PRE']);
+    
+    while (node && node !== document.body && node instanceof Element) {
+      const tagName = node.tagName.toUpperCase();
+      if (tagsToWrap.has(tagName)) {
+        const wrapper = node.cloneNode(false) as Element;
+        wrapper.innerHTML = html;
+        html = wrapper.outerHTML;
+      }
+      
+      // If we reach a list container, wrap once more and stop to prevent over-wrapping
+      if (['UL', 'OL'].includes(tagName)) {
+        const wrapper = node.cloneNode(false) as Element;
+        wrapper.innerHTML = html;
+        html = wrapper.outerHTML;
+        break;
+      }
+      
+      // Stop traversing if we hit a standard block container
+      if (['P', 'DIV', 'SECTION', 'ARTICLE', 'ASIDE', 'MAIN', 'BLOCKQUOTE', 'NAV'].includes(tagName)) {
+        break;
+      }
+      
+      node = node.parentNode;
+    }
+
+    try {
+      lastSelectedMarkdown = turndownService.turndown(html);
+    } catch (err) {
+      console.warn("Failed to convert selection to markdown.", err);
+      lastSelectedMarkdown = selection.toString();
+    }
+  }
 }, true); // Use capture phase
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "GET_LAST_LINK_TEXT") {
     sendResponse({ text: lastClickedLinkText });
+  } else if (request.type === "GET_LAST_SELECTION_MARKDOWN") {
+    sendResponse({ markdown: lastSelectedMarkdown });
   }
 });
