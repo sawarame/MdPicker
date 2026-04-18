@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "MdPicker",
+  "name": "__MSG_appName__",
   "version": "0.1.0",
-  "description": "Copy links as Markdown format directly from context menu.",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
   "permissions": [
     "contextMenus",
     "clipboardWrite",
