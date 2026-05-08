@@ -10,6 +10,12 @@ chrome.runtime.onInstalled.addListener(() => {
     title: chrome.i18n.getMessage("contextMenuSelection"),
     contexts: ["selection"]
   });
+
+  chrome.contextMenus.create({
+    id: "copy-page-as-markdown",
+    title: chrome.i18n.getMessage("contextMenuPage"),
+    contexts: ["page", "action"]
+  });
 });
 
 async function setupOffscreenDocument(path: string) {
@@ -63,6 +69,17 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
 
     await writeToOffscreenClipboard(markdownStr);
+  } else if (info.menuItemId === "copy-page-as-markdown") {
+    let markdownStr = "";
+    if (tab && tab.url && tab.title) {
+      markdownStr = `[${tab.title}](${tab.url})`;
+    } else if (tab && tab.url) {
+      markdownStr = `[${tab.url}](${tab.url})`;
+    }
+
+    if (markdownStr) {
+      await writeToOffscreenClipboard(markdownStr);
+    }
   }
 });
 

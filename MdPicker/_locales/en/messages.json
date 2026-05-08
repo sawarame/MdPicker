@@ -14,5 +14,9 @@
   "contextMenuSelection": {
     "message": "Copy selection as Markdown",
     "description": "Title for the selection context menu item."
+  },
+  "contextMenuPage": {
+    "message": "Copy Page as Markdown Link",
+    "description": "Title for the page context menu item."
   }
 }

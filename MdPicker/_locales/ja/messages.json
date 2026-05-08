@@ -14,5 +14,9 @@
   "contextMenuSelection": {
     "message": "選択範囲をMarkdownとしてコピー",
     "description": "選択テキスト用コンテキストメニューの項目名。"
+  },
+  "contextMenuPage": {
+    "message": "このページをリンクとしてコピー",
+    "description": "ページ全体用コンテキストメニューの項目名。"
   }
 }
