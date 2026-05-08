@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-# カスタム AI 指示書 (GEMINI.md)
+# カスタム AI 指示書
 
 このドキュメントは、このプロジェクトにおいて AI とコミュニケーションを取る際の基本的なルール・前提条件を定めたものです。
 
@@ -30,4 +30,3 @@ trigger: always_on
 * ユーザーがフォーカスした HTML 要素のテキストなどを取得する場合は必ず **Content Script** を経由し、Message Passing（`chrome.runtime.sendMessage` や `chrome.tabs.sendMessage`）等で連携してください。
 * `console.log` やエラー出力は適切に残しつつも、リリース用ビルドでの過度なログ散発にならないよう注意してください。
 * 追加で拡張機能の権限を追加する場合は、必ず User (開発者) へ事前に意図を説明した上で `manifest.json` を更新してください。
-

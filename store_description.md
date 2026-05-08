@@ -18,7 +18,7 @@ Copy links and selected text as Markdown with a single right-click. Ideal for de
 ### 詳細な説明（Detailed Description）
 
 ```
-MdPicker is a lightweight Chrome extension that adds two powerful options to your right-click context menu: "Copy Link as Markdown" and "Copy Selection as Markdown." With a single click, you can convert any web link or selected text into clean, ready-to-paste Markdown — no setup required.
+MdPicker is a lightweight Chrome extension that adds three powerful options to your right-click context menu: "Copy Link as Markdown", "Copy Selection as Markdown", and "Copy Page as Markdown Link". With a single click, you can convert any web link, selected text, or the entire page into clean, ready-to-paste Markdown — no setup required.
 
 ---
 
@@ -29,6 +29,9 @@ Hover over any hyperlink, right-click, and select "Copy Link as Markdown." MdPic
 
 📝 Copy Selection as Markdown
 Select any text on a webpage — paragraphs, headings, bold text, bullet lists, and more — then right-click and choose "Copy Selection as Markdown." MdPicker intelligently analyzes the underlying HTML structure and converts it into accurate Markdown syntax (e.g., # Heading, **bold**, - list item), preserving the visual formatting of the original content.
+
+🌐 Copy Page as Markdown Link
+Right-click anywhere on the page (or on the extension icon) and select "Copy Page as Markdown Link." MdPicker will instantly create a Markdown link using the current page's title and URL: [Page Title](URL).
 
 🛡️ Secure & Modern Architecture (Manifest V3)
 Built fully in compliance with Chrome's latest Manifest V3 standard. Operates via a lightweight Service Worker with no persistent background processes, and uses the Offscreen Document API for secure, reliable clipboard access — no legacy hacks required.
@@ -55,6 +58,11 @@ Copying selected text:
 1. Drag to select any text, list, or heading on a webpage.
 2. Right-click and select "Copy Selection as Markdown."
 3. Paste the converted Markdown directly into your document.
+
+Copying the page as a link:
+1. Right-click on an empty space on the page, or right-click the extension icon.
+2. Select "Copy Page as Markdown Link."
+3. Paste to get the page's title and URL formatted as a Markdown link.
 
 ---
 
@@ -89,7 +97,7 @@ MdPicker is open source. Contributions and feedback are welcome on GitHub.
 ### 詳細な説明（Detailed Description）
 
 ```
-MdPicker は、Chrome の右クリックメニューに「リンクをMarkdownとしてコピー」と「選択範囲をMarkdownとしてコピー」の2つの強力なメニュー項目を追加する、シンプルで軽量な Chrome 拡張機能です。クリック一回で、WebページのリンクやテキストをきれいなMarkdown形式に変換してクリップボードにコピーできます。設定不要ですぐに使えます。
+MdPicker は、Chrome の右クリックメニューに「リンクをMarkdownとしてコピー」「選択範囲をMarkdownとしてコピー」「このページをリンクとしてコピー」の3つの強力なメニュー項目を追加する、シンプルで軽量な Chrome 拡張機能です。クリック一回で、Webページ上のリンク・テキスト、または現在のページの情報をきれいなMarkdown形式に変換してクリップボードにコピーできます。設定不要ですぐに使えます。
 
 ---
 
@@ -100,6 +108,9 @@ MdPicker は、Chrome の右クリックメニューに「リンクをMarkdown�
 
 📝 選択範囲をMarkdown形式でコピー
 Webページ上の段落・見出し・太字・箇条書きなど、任意のテキストを選択して右クリックし「選択範囲をMarkdownとしてコピー」を選択。MdPicker は背後のHTML構造を解析し、元のページの見た目（書式）を維持したまま、正確なMarkdown記法（例: # 見出し、**太字**、- リスト）に自動変換します。
+
+🌐 現在のページをリンクとしてコピー
+ページ上の何もない場所、または拡張機能アイコンを右クリックして「このページをリンクとしてコピー」を選択するだけで、現在のページのタイトルとURLを用いて `[ページタイトル](URL)` の形式でクリップボードに保存します。
 
 🛡️ セキュアで最新のアーキテクチャ（Manifest V3）
 Chromeの最新規格である Manifest V3 に完全準拠して構築されています。軽量な Service Worker によりバックグラウンド常駐プロセスが不要で、Offscreen Document API を用いた安全なクリップボードアクセスを実現。古い手法への依存が一切ありません。
@@ -126,6 +137,11 @@ Chromeの最新規格である Manifest V3 に完全準拠して構築されて�
 1. Webページ上でコピーしたいテキスト・見出し・箇条書き等をドラッグして選択します。
 2. 右クリックし、「選択範囲をMarkdownとしてコピー」を選択します。
 3. 変換済みのMarkdownをそのままドキュメントにペーストして使用できます。
+
+現在のページをリンクとしてコピーする場合：
+1. ページ上の何もない場所、または拡張機能のアイコンを右クリックします。
+2. 「このページをリンクとしてコピー」を選択します。
+3. ペーストすると、ページのタイトルとURLがMarkdownリンクとして貼り付けられます。
 
 ---
 

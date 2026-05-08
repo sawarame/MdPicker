@@ -10,13 +10,17 @@ trigger: always_on
 ## コア機能仕様
 
 1. **コンテキストメニュー登録**
-   * 対象: リンク要素（`<a>`タグ）のみ (`contexts: ["link"]`)。ラベル: `Copy Link as Markdown`。
+   * 対象: リンク要素 (`contexts: ["link"]`)。ラベル: `Copy Link as Markdown`。
    * 対象: 選択範囲 (`contexts: ["selection"]`)。ラベル: `Copy selection as Markdown`。
+   * 対象: ページ全体・拡張機能アイコン (`contexts: ["page", "action"]`)。ラベル: `Copy Page as Markdown Link` (日本語環境: `このページをリンクとしてコピー`)。
 
 2. **リンクテキストの取得仕様**
-   * **課題**: Chrome の `contextMenu` API（`OnClickData`）では、リンクの URL(`linkUrl`) は取得できるものの、リンクのアンカーテキスト（表示テキスト）は直接取得できません。
-   * **解決策**: `content.ts` (Content Script) を全てのページへ注入しておき、`contextmenu`（右クリック）イベントをフックして、直前に右クリックされた `<a>` 要素の `textContent` を常に一時保存します。
-   * **データ取得フロー**: コンテキストメニューをクリックした際、バックグラウンドスクリプトから Content Script に対してメッセージ通信を行い、保存されているテキストを取得。取得できない場合は `Link` という文字列にフォールバックします。
+   * **課題**: Chrome の `contextMenu` API では、リンクの URL は取得できるものの、表示テキストは直接取得できません。また SPA (React等) における要素判定の難しさや、iframe 内での動作という課題がありました。
+   * **解決策**: `content.ts` を全ページへ注入し、`contextmenu` イベントをフックします。`composedPath()` と `nodeName` を用いて確実に対象の `<a>` 要素を特定し、`textContent`、`alt`、`aria-label` 等からテキストを一時保存します。
+   * **データ取得フロー**: コンテキストメニューをクリックした際、バックグラウンドから Content Script (該当の `frameId` を指定) に対してメッセージ通信を行いテキストを取得。取得できない場合は `selectionText`（選択範囲）、それもなければ `Link` にフォールバックします。
+
+3. **現在のページをリンクとしてコピーする仕様 (新規追加)**
+   * ページ上の空白部分、または拡張機能アイコンを右クリックした際、現在のタブのタイトル (`tab.title`) と URL (`tab.url`) を組み合わせて `[タイトル](URL)` のMarkdownリンクを生成しクリップボードに保存します。
 
 3. **選択範囲のMarkdown変換仕様**
    * **課題**: Chrome 標準APIの `selectionText` ではプレーンテキストしか持たないため、元のWebページにある太字や見出しなどのタグ情報が欠落してしまいます。
@@ -35,8 +39,8 @@ trigger: always_on
   * コンテントスクリプト: `<all_urls>` で動作予定 (`document_start` もしくは `document_idle`)。
 
 * **`src/background.ts`**:
-  * インストール時に2種類のコンテキストメニュー（URLリンク用、選択範囲用）を作成。
-  * メニュークリックを監視し、Content Script に「リンクテキスト」または「選択範囲のMarkdown」を問い合わせる。
+  * インストール時に3種類のコンテキストメニュー（URLリンク用、選択範囲用、ページ全体/アイコン用）を作成。
+  * メニュークリックを監視し、Content Script に「リンクテキスト」または「選択範囲のMarkdown」を問い合わせる。ページ全体のコピー時は `tab.title` と `tab.url` を使用。
   * `Offscreen Document` を作成（すでに存在する場合はスキップ）。
   * テキストとURLを組み合わせて `[Text](URL)` フォーマットの文字列を作成、もしくは取得したMarkdownをそのまま Offscreen に送信。
 
