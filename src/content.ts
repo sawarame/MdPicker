@@ -13,9 +13,9 @@ const turndownService = new TurndownService({
 });
 turndownService.use(tables);
 
-function extractLinkText(link: HTMLAnchorElement): string {
-  // innerText retrieves visually rendered text and ignores hidden elements
-  let text = link.innerText?.trim() || link.textContent?.trim() || "";
+function extractLinkText(link: Element): string {
+  // textContent is safer in content scripts than innerText, which can sometimes be empty
+  let text = link.textContent?.trim() || (link as HTMLElement).innerText?.trim() || "";
 
   // If text is still empty, fallback to alt, aria-label, or title
   if (!text) {
@@ -34,20 +34,21 @@ function extractLinkText(link: HTMLAnchorElement): string {
 }
 
 document.addEventListener("contextmenu", (e) => {
-  let link: HTMLAnchorElement | null = null;
+  let link: Element | null = null;
 
   // Use composedPath() to traverse through open Shadow DOM boundaries
   if (e.composedPath) {
     for (const node of e.composedPath()) {
-      if (node instanceof Element && node.tagName && node.tagName.toLowerCase() === 'a') {
-        link = node as HTMLAnchorElement;
+      const el = node as any;
+      if (el.nodeName && el.nodeName.toLowerCase() === 'a') {
+        link = el;
         break;
       }
     }
   } else {
     // Fallback for older browsers
-    const target = e.target;
-    if (target instanceof Element) {
+    const target = e.target as any;
+    if (target && target.closest) {
       link = target.closest("a");
     }
   }
