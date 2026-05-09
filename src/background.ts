@@ -83,6 +83,48 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
+chrome.commands.onCommand.addListener(async (command, tab) => {
+  if (command === "smart-copy") {
+    let targetTab = tab;
+    
+    // Fallback if tab is not passed by the API
+    if (!targetTab || !targetTab.id) {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      targetTab = tabs[0];
+    }
+
+    if (!targetTab) {
+      console.error("No active tab found for smart-copy command");
+      return;
+    }
+
+    let markdownStr = "";
+    if (targetTab.id) {
+      try {
+        const response = await chrome.tabs.sendMessage(targetTab.id, { type: "GET_SMART_MARKDOWN" });
+        if (response && response.markdown) {
+          markdownStr = response.markdown;
+        }
+      } catch (err) {
+        console.warn("Could not get markdown from content script for shortcut.", err);
+      }
+    }
+
+    // If no selection markdown, fallback to page markdown
+    if (!markdownStr) {
+      if (targetTab.url && targetTab.title) {
+        markdownStr = `[${targetTab.title}](${targetTab.url})`;
+      } else if (targetTab.url) {
+        markdownStr = `[${targetTab.url}](${targetTab.url})`;
+      }
+    }
+
+    if (markdownStr) {
+      await writeToOffscreenClipboard(markdownStr);
+    }
+  }
+});
+
 async function writeToOffscreenClipboard(text: string) {
   try {
     await setupOffscreenDocument('offscreen.html');

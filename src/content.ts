@@ -33,32 +33,7 @@ function extractLinkText(link: Element): string {
   return text.replace(/\s+/g, ' ');
 }
 
-document.addEventListener("contextmenu", (e) => {
-  let link: Element | null = null;
-
-  // Use composedPath() to traverse through open Shadow DOM boundaries
-  if (e.composedPath) {
-    for (const node of e.composedPath()) {
-      const el = node as any;
-      if (el.nodeName && el.nodeName.toLowerCase() === 'a') {
-        link = el;
-        break;
-      }
-    }
-  } else {
-    // Fallback for older browsers
-    const target = e.target as any;
-    if (target && target.closest) {
-      link = target.closest("a");
-    }
-  }
-
-  if (link) {
-    lastClickedLinkText = extractLinkText(link);
-  }
-
-  // Handle generalized text selection
-  lastSelectedMarkdown = "";
+function getSelectionMarkdown(): string {
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
     const range = selection.getRangeAt(0);
@@ -103,12 +78,41 @@ document.addEventListener("contextmenu", (e) => {
     }
 
     try {
-      lastSelectedMarkdown = turndownService.turndown(html);
+      return turndownService.turndown(html);
     } catch (err) {
       console.warn("Failed to convert selection to markdown.", err);
-      lastSelectedMarkdown = selection.toString();
+      return selection.toString();
     }
   }
+  return "";
+}
+
+document.addEventListener("contextmenu", (e) => {
+  let link: Element | null = null;
+
+  // Use composedPath() to traverse through open Shadow DOM boundaries
+  if (e.composedPath) {
+    for (const node of e.composedPath()) {
+      const el = node as any;
+      if (el.nodeName && el.nodeName.toLowerCase() === 'a') {
+        link = el;
+        break;
+      }
+    }
+  } else {
+    // Fallback for older browsers
+    const target = e.target as any;
+    if (target && target.closest) {
+      link = target.closest("a");
+    }
+  }
+
+  if (link) {
+    lastClickedLinkText = extractLinkText(link);
+  }
+
+  // Handle generalized text selection
+  lastSelectedMarkdown = getSelectionMarkdown();
 }, true); // Use capture phase
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -116,5 +120,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ text: lastClickedLinkText });
   } else if (request.type === "GET_LAST_SELECTION_MARKDOWN") {
     sendResponse({ markdown: lastSelectedMarkdown });
+  } else if (request.type === "GET_SMART_MARKDOWN") {
+    sendResponse({ markdown: getSelectionMarkdown() });
   }
 });
