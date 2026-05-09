@@ -1,20 +1,22 @@
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: "copy-as-markdown",
-    title: chrome.i18n.getMessage("contextMenuTitle"),
-    contexts: ["link"]
-  });
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: "copy-as-markdown",
+      title: chrome.i18n.getMessage("contextMenuTitle"),
+      contexts: ["link"]
+    });
 
-  chrome.contextMenus.create({
-    id: "copy-selection-as-markdown",
-    title: chrome.i18n.getMessage("contextMenuSelection"),
-    contexts: ["selection"]
-  });
+    chrome.contextMenus.create({
+      id: "copy-selection-as-markdown",
+      title: chrome.i18n.getMessage("contextMenuSelection"),
+      contexts: ["selection"]
+    });
 
-  chrome.contextMenus.create({
-    id: "copy-page-as-markdown",
-    title: chrome.i18n.getMessage("contextMenuPage"),
-    contexts: ["page", "action"]
+    chrome.contextMenus.create({
+      id: "copy-page-as-markdown",
+      title: chrome.i18n.getMessage("contextMenuPage"),
+      contexts: ["page"]
+    });
   });
 });
 
