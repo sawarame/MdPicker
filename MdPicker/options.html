@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MdPicker Options</title>
+  <style>
+    body {
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-width: 300px;
+    }
+    .option-item {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+    .option-item label {
+      margin-left: 8px;
+      cursor: pointer;
+    }
+    .option-details {
+      margin-left: 25px;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+    }
+    .option-details label {
+      margin-right: 8px;
+      font-size: 0.9em;
+    }
+    #status {
+      margin-top: 15px;
+      color: green;
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="option-item">
+    <input type="checkbox" id="include-favicon">
+    <label for="include-favicon" id="label-include-favicon">Include favicon in page link</label>
+  </div>
+  
+  <div class="option-details" id="favicon-size-container">
+    <label for="favicon-size" id="label-favicon-size">Size:</label>
+    <select id="favicon-size">
+      <option value="12">12px</option>
+      <option value="16">16px</option>
+      <option value="24">24px</option>
+      <option value="32">32px</option>
+    </select>
+  </div>
+  
+  <div id="status"></div>
+
+  <script src="js/options.js"></script>
+</body>
+</html>

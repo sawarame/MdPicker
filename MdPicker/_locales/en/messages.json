@@ -18,5 +18,17 @@
   "contextMenuPage": {
     "message": "Copy Page as Markdown Link",
     "description": "Title for the page context menu item."
+  },
+  "optionIncludeFavicon": {
+    "message": "Include favicon in page link",
+    "description": "Label for include favicon option."
+  },
+  "optionsSaved": {
+    "message": "Options saved",
+    "description": "Message shown when options are saved."
+  },
+  "optionFaviconSize": {
+    "message": "Size:",
+    "description": "Label for favicon size option."
   }
 }

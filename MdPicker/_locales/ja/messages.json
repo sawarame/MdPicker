@@ -18,5 +18,17 @@
   "contextMenuPage": {
     "message": "このページをリンクとしてコピー",
     "description": "ページ全体用コンテキストメニューの項目名。"
+  },
+  "optionIncludeFavicon": {
+    "message": "ページリンクにfaviconを含める",
+    "description": "オプション画面：faviconを含めるかどうかのラベル。"
+  },
+  "optionsSaved": {
+    "message": "保存されました",
+    "description": "オプション画面：保存完了メッセージ。"
+  },
+  "optionFaviconSize": {
+    "message": "サイズ：",
+    "description": "オプション画面：faviconサイズのラベル。"
   }
 }

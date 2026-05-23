@@ -74,9 +74,29 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   } else if (info.menuItemId === "copy-page-as-markdown") {
     let markdownStr = "";
     if (tab && tab.url && tab.title) {
-      markdownStr = `[${tab.title}](${tab.url})`;
-    } else if (tab && tab.url) {
-      markdownStr = `[${tab.url}](${tab.url})`;
+      const { includeFavicon, faviconSize } = await chrome.storage.sync.get({ 
+        includeFavicon: false,
+        faviconSize: '16'
+      });
+      
+      if (includeFavicon) {
+        let faviconUrl = "";
+        try {
+          const url = new URL(tab.url);
+          // 設定されたサイズを使用
+          faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=${faviconSize}`;
+        } catch (err) {
+          faviconUrl = tab.favIconUrl || "";
+        }
+
+        if (faviconUrl) {
+          markdownStr = `![favicon](${faviconUrl}) [${tab.title}](${tab.url})`;
+        } else {
+          markdownStr = `[${tab.title}](${tab.url})`;
+        }
+      } else {
+        markdownStr = `[${tab.title}](${tab.url})`;
+      }
     }
 
     if (markdownStr) {
@@ -115,7 +135,27 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
     // If no selection markdown, fallback to page markdown
     if (!markdownStr) {
       if (targetTab.url && targetTab.title) {
-        markdownStr = `[${targetTab.title}](${targetTab.url})`;
+        const { includeFavicon, faviconSize } = await chrome.storage.sync.get({ 
+          includeFavicon: false,
+          faviconSize: '16'
+        });
+        if (includeFavicon) {
+          let faviconUrl = "";
+          try {
+            const url = new URL(targetTab.url);
+            faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=${faviconSize}`;
+          } catch (err) {
+            faviconUrl = targetTab.favIconUrl || "";
+          }
+
+          if (faviconUrl) {
+            markdownStr = `![favicon](${faviconUrl}) [${targetTab.title}](${targetTab.url})`;
+          } else {
+            markdownStr = `[${targetTab.title}](${targetTab.url})`;
+          }
+        } else {
+          markdownStr = `[${targetTab.title}](${targetTab.url})`;
+        }
       } else if (targetTab.url) {
         markdownStr = `[${targetTab.url}](${targetTab.url})`;
       }

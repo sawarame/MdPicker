@@ -4,7 +4,8 @@ module.exports = {
   entry: {
     background: './src/background.ts',
     content: './src/content.ts',
-    offscreen: './src/offscreen.ts'
+    offscreen: './src/offscreen.ts',
+    options: './src/options.ts'
   },
   output: {
     path: path.resolve(__dirname, 'MdPicker', 'js'),
