@@ -4,7 +4,7 @@
     "description": "The name of the extension."
   },
   "appDesc": {
-    "message": "Copy links as Markdown format directly from context menu.",
+    "message": "Copy links, selected text, or page info as Markdown with a right-click. Now supports favicons and customizable sizes for page links.",
     "description": "The description of the extension."
   },
   "contextMenuTitle": {

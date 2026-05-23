@@ -1,7 +1,7 @@
 # MdPicker - プロジェクト仕様書
 
 ## 概要
-「MdPicker」は、Webページ上のリンクや選択した範囲を右クリックし、コンテキストメニュー（右クリックメニュー）から簡単にMarkdown形式へと変換・取得してクリップボードへコピーできる Chrome 拡張機能です。Manifest V3 の仕様に完全に準拠して設計されています。
+「MdPicker」は、Webページ上のリンクや選択した範囲を右クリックし、コンテキストメニュー（右クリックメニュー）から簡単にMarkdown形式へと変換・取得してクリップボードへコピーできる Chrome 拡張機能です。Manifest V3 の仕様に完全に準拠して設計されており、オプション画面から動作のカスタマイズが可能です。
 
 ## コア機能仕様
 
@@ -11,43 +11,45 @@
    * 対象: ページ全体・拡張機能アイコン (`contexts: ["page", "action"]`)。ラベル: `Copy Page as Markdown Link` (日本語環境: `このページをリンクとしてコピー`)。
 
 2. **リンクテキストの取得仕様**
-   * **課題**: Chrome の `contextMenu` API では、リンクの URL は取得できるものの、表示テキストは直接取得できません。また SPA (React等) における要素判定の難しさや、iframe 内での動作という課題がありました。
-   * **解決策**: `content.ts` を全ページへ注入し、`contextmenu` イベントをフックします。`composedPath()` と `nodeName` を用いて確実に対象の `<a>` 要素を特定し、`textContent`、`alt`、`aria-label` 等からテキストを一時保存します。
-   * **データ取得フロー**: コンテキストメニューをクリックした際、バックグラウンドから Content Script (該当の `frameId` を指定) に対してメッセージ通信を行いテキストを取得。取得できない場合は `selectionText`（選択範囲）、それもなければ `Link` にフォールバックします。
+   * **課題**: Chrome の `contextMenu` API では、リンクの URL は取得できるものの、表示テキストは直接取得できません。
+   * **解決策**: `content.ts` を全ページへ注入し、`contextmenu` イベントをフックします。`composedPath()` と `nodeName` を用いて確実に対象の `<a>` 要素を特定し、テキスト情報を一時保存します。
+   * **データ取得フロー**: メニュークリック時にバックグラウンドから Content Script へ問い合わせを行い、リンクテキストを取得します。
 
-3. **現在のページをリンクとしてコピーする仕様 (新規追加)**
-   * ページ上の空白部分、または拡張機能アイコンを右クリックした際、現在のタブのタイトル (`tab.title`) と URL (`tab.url`) を組み合わせて `[タイトル](URL)` のMarkdownリンクを生成しクリップボードに保存します。
+3. **現在のページをリンクとしてコピーする仕様**
+   * ページ上の空白部分等を右クリックした際、現在のタブのタイトルとURLを組み合わせて `[タイトル](URL)` のMarkdownリンクを生成します。
 
-3. **選択範囲のMarkdown変換仕様**
-   * **課題**: Chrome 標準APIの `selectionText` ではプレーンテキストしか持たないため、元のWebページにある太字や見出しなどのタグ情報が欠落してしまいます。
-   * **解決策**: Content Script 内に `turndown` パッケージを組み込んでいます。右クリック時に `window.getSelection()` を使って現在のHTML要素を抽出し、さらに親要素までタグ要素（`<h1>`や`<ul>`等）を辿ることで、部分的な選択であっても構造を維持したまま精度の高いMarkdownへと変換して保存します。
+4. **favicon付与機能（オプション設定）**
+   * オプション画面で設定を有効にすると、ページ全体のコピー時にfavicon画像を先頭に付与します（形式: `![favicon](url) [タイトル](URL)`）。
+   * **favicon取得**: Google Favicon Service (`https://www.google.com/s2/favicons?domain={domain}&sz={size}`) を利用し、ドメインに基づいた安定したURLを取得します。
+   * **サイズ設定**: 12px / 16px / 24px / 32px から選択可能です（デフォルトは 16px）。
 
-4. **クリップボードへの書き込み仕様**
-   * **課題**: Manifest V3 拡張機能の Service Worker はブラウザの DOM 機構を持たないため、古い `document.execCommand('copy')` が動作せず、`navigator.clipboard` の挙動も制限があります。
-   * **解決策**: 「Offscreen Document API」を利用します。バックグラウンド上で不可視のHTML文書 (`offscreen.html`) を動的に生成し、Service Worker からメッセージを送って Offscreen 側の JavaScript (`offscreen.ts`) で確実にクリップボードにアクセス・コピーを行います。
+5. **選択範囲のMarkdown変換仕様**
+   * **課題**: 標準の `selectionText` ではリッチテキストの情報が欠落します。
+   * **解決策**: Content Script 内で `turndown` を使用。選択範囲のHTMLを抽出し、構造を維持したまま精度の高いMarkdownへと変換します。
+
+6. **クリップボードへの書き込み仕様**
+   * **課題**: Manifest V3 の Service Worker は DOM を持たないため、直接のコピー操作が制限されます。
+   * **解決策**: 「Offscreen Document API」を利用。不可視の `offscreen.html` を介して、確実なクリップボードアクセスを実現しています。
 
 ## 技術コンポーネント詳細
 
 * **`manifest.json`**:
-  * バージョン: `manifest_version: 3`
-  * 権限 (`permissions`): `contextMenus`, `clipboardWrite`, `offscreen`
-  * バックグラウンド: `js/background.js` (Service Worker)
-  * コンテントスクリプト: `<all_urls>` で動作予定 (`document_start` もしくは `document_idle`)。
+  * 権限 (`permissions`): `contextMenus`, `clipboardWrite`, `offscreen`, `tabs`, `storage`
+  * 設定画面: `options_ui` を定義。
 
 * **`src/background.ts`**:
-  * インストール時に3種類のコンテキストメニュー（URLリンク用、選択範囲用、ページ全体/アイコン用）を作成。
-  * メニュークリックを監視し、Content Script に「リンクテキスト」または「選択範囲のMarkdown」を問い合わせる。ページ全体のコピー時は `tab.title` と `tab.url` を使用。
-  * `Offscreen Document` を作成（すでに存在する場合はスキップ）。
-  * テキストとURLを組み合わせて `[Text](URL)` フォーマットの文字列を作成、もしくは取得したMarkdownをそのまま Offscreen に送信。
+  * 各種コピー操作のハンドリングを担当。
+  * `chrome.storage.sync` からユーザー設定（faviconの有無やサイズ）を読み取り、動的にマークダウン文字列を生成。
 
 * **`src/content.ts`**:
-  * EventListener で `contextmenu` をキャプチャし、クリックされた要素から `.closest('a')` でリンクを見つけテキストを保持。
-  * 同時に `window.getSelection()` から選択範囲を抽出し、親要素を遡ってタグ構造を再構成の上 `turndown` でMarkdownに変換。
-  * バックグラウンドからの `GET_LAST_LINK_TEXT` および `GET_LAST_SELECTION_MARKDOWN` リクエストに対してデータを返却。
+  * リンク要素の特定とテキスト抽出、および `turndown` による選択範囲のMarkdown変換を担当。
+
+* **`src/options.ts` / `options.html`**:
+  * ユーザー設定（faviconの利用有無、アイコンサイズ）の保存・管理を担当。設定は `chrome.storage.sync` で同期されます。
 
 * **`offscreen.html` / `src/offscreen.ts`**:
-  * DOM(textarea等)を使用した高互換なクリップボードコピーロジックの実装（`execCommand` または `navigator.clipboard` の呼び出し）。
+  * Service Worker からのメッセージを受け取り、クリップボードへの書き込みを実行。
 
 ## 今後の拡張性への考慮点
-* オプションページを用意し、Markdown以外（HTML、リッチテキスト等）のフォーマット変更機能追加も可能な構成としています。
-* デバッグやテストを行いやすいよう、バックグラウンドプロセスから機能ごとにモジュール分割しやすいアーキテクチャを持ち合わせています。
+* オプション画面の基盤が整っているため、Markdown以外（HTML、リッチテキスト等）のフォーマット追加や、カスタムテンプレート機能の実装も容易な構成です。
+* デバッグやテストを行いやすいよう、機能ごとに明確に責務を分離したアーキテクチャを採用しています。
