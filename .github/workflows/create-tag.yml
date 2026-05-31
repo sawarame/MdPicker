@@ -18,7 +18,7 @@ jobs:
 
       - name: Get version from manifest.json
         run: |
-          VERSION=$(jq -r '.version' MdPicker/manifest.json)
+          VERSION=$(jq -r '.version' package/manifest.json)
           echo "VERSION=v$VERSION" >> $GITHUB_ENV
           echo "Detected version: v$VERSION"
 

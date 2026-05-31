@@ -14,12 +14,12 @@
 このプロジェクトは、ソースコードと拡張機能のパッケージ本体（Chrome に読み込ませるディレクトリ）を明確に分離しています。
 
 * `src/` : TypeScript のソースコードを格納するディレクトリ（`background.ts`, `content.ts`, `offscreen.ts` など）
-* `MdPicker/` : **拡張機能本体のルートディレクトリ**。Chrome 拡張機能として読み込まれる実体です。
-  * `MdPicker/manifest.json` : 拡張機能の設定ファイル。
-  * `MdPicker/offscreen.html` : クリップボードなどの DOM 操作を行うバックグラウンド用 HTML。
-  * `MdPicker/js/` : Webpack によってコンパイル・出力された JavaScript ファイルが格納されるディレクトリ。
-* `webpack.config.js` : ビルド設定。出力を `./MdPicker/js/` フォルダへ行うよう構成されています。
-* `tsconfig.json` : TypeScript 設定（ビルドパスが `MdPicker/js` を向くように設定されています）。
+* `package/` : **拡張機能本体のルートディレクトリ**。Chrome 拡張機能として読み込まれる実体です。
+  * `package/manifest.json` : 拡張機能の設定ファイル。
+  * `package/offscreen.html` : クリップボードなどの DOM 操作を行うバックグラウンド用 HTML。
+  * `package/js/` : Webpack によってコンパイル・出力された JavaScript ファイルが格納されるディレクトリ。
+* `webpack.config.js` : ビルド設定。出力を `./package/js/` フォルダへ行うよう構成されています。
+* `tsconfig.json` : TypeScript 設定（ビルドパスが `package/js` を向くように設定されています）。
 
 ## 3. 実装の取り決めと制約案 (Manifest V3)
 * Service Worker (`background.ts`) は DOM へのアクセス権を持たないため、クリップボードへの書き込みなどは必ず **Offscreen Document API** などを用いて行ってください。

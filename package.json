@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "Copy links as Markdown",
   "scripts": {
-    "build": "rimraf ./MdPicker/js && rimraf MdPicker.zip && webpack --mode production && (cd MdPicker && zip -r ../MdPicker.zip .)",
+    "build": "rimraf ./package/js && rimraf package.zip && webpack --mode production && (cd package && zip -r ../package.zip .)",
     "dev": "webpack --mode development --watch",
     "generate-icons": "node scripts/generate-icons.js"
   },

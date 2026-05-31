@@ -8,7 +8,7 @@ module.exports = {
     options: './src/options.ts'
   },
   output: {
-    path: path.resolve(__dirname, 'MdPicker', 'js'),
+    path: path.resolve(__dirname, 'package', 'js'),
     filename: '[name].js',
     clean: true
   },

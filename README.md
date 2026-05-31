@@ -35,7 +35,7 @@ Since this extension is currently under development, you will need to load it ma
 3. Open Chrome and enter `chrome://extensions/` in the URL bar to open the extensions management page.
 4. Turn **ON** the **"Developer mode"** toggle switch in the upper right corner of the screen.
 5. Click **"Load unpacked"** in the upper left corner.
-6. Select the `MdPicker/MdPicker` directory (it MUST be the folder containing `manifest.json` inside it).
+6. Select the `MdPicker/package` directory (it MUST be the folder containing `manifest.json` inside it).
 7. Installation is complete. You can verify this by checking that the MdPicker icon has been added next to your browser's address bar.
 
 ## 🛠️ Development

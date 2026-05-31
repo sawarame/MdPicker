@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const inputSvg = path.join(__dirname, '../src/icon.svg');
-const outputDir = path.join(__dirname, '../MdPicker/images');
+const outputDir = path.join(__dirname, '../package/images');
 
 const sizes = [16, 32, 48, 128];
 

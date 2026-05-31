@@ -4,8 +4,8 @@ npm-debug.log
 yarn-error.log
 
 # Build output
-MdPicker/js/
-MdPicker.zip
+package/js/
+package.zip
 
 # macOS system files
 .DS_Store

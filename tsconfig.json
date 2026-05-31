@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./MdPicker/js",
+    "outDir": "./package/js",
     "rootDir": "./src",
     "types": ["chrome"]
   },
