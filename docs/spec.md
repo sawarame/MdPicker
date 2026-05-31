@@ -25,11 +25,15 @@
 
 5. **選択範囲のMarkdown変換仕様**
    * **課題**: 標準の `selectionText` ではリッチテキストの情報が欠落します。
-   * **解決策**: Content Script 内で `turndown` を使用。選択範囲のHTMLを抽出し、構造を維持したまま精度の高いMarkdownへと変換します。
+   * **解決策**: Content Script 内で `turndown` を使用。選択範囲のHTMLを抽出し、構造を維持したまま精度の高いMarkdownへと変換します。さらに GFM (GitHub Flavored Markdown) プラグインの導入により、HTMLのテーブル（表）要素などもマークダウンの表形式として変換可能です。
 
 6. **クリップボードへの書き込み仕様**
    * **課題**: Manifest V3 の Service Worker は DOM を持たないため、直接のコピー操作が制限されます。
    * **解決策**: 「Offscreen Document API」を利用。不可視の `offscreen.html` を介して、確実なクリップボードアクセスを実現しています。
+
+7. **ビルド・デプロイ仕様 (CI/CD)**
+   * **ビルド出力先**: ソースコード (`src/`) を Webpack と TypeScript でコンパイルし、拡張機能の本体は `package/` ディレクトリに出力される構成となっています。
+   * **自動公開 (GitHub Actions)**: リリース作成時に、`chrome-webstore-upload-cli` を利用して Chrome Web Store への自動アップロードおよび審査提出を行う CI/CD パイプラインが構築されています。
 
 ## 技術コンポーネント詳細
 
