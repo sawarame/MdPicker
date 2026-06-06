@@ -25,7 +25,7 @@ MdPicker is a lightweight Chrome extension that adds powerful Markdown conversio
 Automatically extracts the link's display text and URL to create a perfect [Link Text](URL) format.
 
 - Copy Selection as Markdown
-Intelligently analyzes the HTML structure (headings, bold, lists, etc.) of your selected text and converts it into accurate Markdown while preserving the original formatting.
+Intelligently analyzes the HTML structure (headings, bold, lists, etc.) of your selected text and converts it into accurate Markdown while preserving the original formatting. Now automatically resolves relative image paths and links to absolute URLs to prevent broken resources when pasting.
 
 - Copy Page as Markdown Link
 Instantly creates a Markdown link of the current page's title and URL.
@@ -80,7 +80,7 @@ MdPicker は、Chrome の右クリックメニューに強力な Markdown 変換
 リンクの表示テキストと URL を自動抽出し、[表示テキスト](URL) の形式でコピーします。
 
 ■ 選択範囲を Markdown としてコピー
-Webページ上の見出し、太字、箇条書きなどの HTML 構造を解析。元の書式を維持したまま、正確な Markdown 記法に変換します。
+Webページ上の見出し、太字、箇条書きなどの HTML 構造を解析。元の書式を維持したまま、正確な Markdown 記法に変換します。コピー時に、選択範囲内の画像やリンクの相対パスを絶対URLに自動変換するため、貼り付け先での画像表示エラーやリンク切れを防ぎます。
 
 ■ このページをリンクとしてコピー
 現在のページのタイトルと URL から、即座に [ページタイトル](URL) の形式でリンクを作成します。

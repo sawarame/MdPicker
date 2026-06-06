@@ -1,6 +1,6 @@
 {
   "name": "md-picker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Copy links as Markdown",
   "scripts": {
     "build": "rimraf ./package/js && rimraf package.zip && webpack --mode production && (cd package && zip -r ../package.zip .)",
