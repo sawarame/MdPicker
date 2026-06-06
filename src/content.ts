@@ -40,6 +40,24 @@ function getSelectionMarkdown(): string {
     const div = document.createElement('div');
     div.appendChild(range.cloneContents());
     
+    // Resolve relative URLs for images to absolute URLs using browser's native resolution
+    const imgs = div.querySelectorAll('img');
+    imgs.forEach(img => {
+      const htmlImg = img as HTMLImageElement;
+      if (htmlImg.src) {
+        htmlImg.setAttribute('src', htmlImg.src);
+      }
+    });
+
+    // Resolve relative URLs for links to absolute URLs using browser's native resolution
+    const links = div.querySelectorAll('a');
+    links.forEach(a => {
+      const htmlLink = a as HTMLAnchorElement;
+      if (htmlLink.href) {
+        htmlLink.setAttribute('href', htmlLink.href);
+      }
+    });
+    
     let html = div.innerHTML;
     let node: Node | null = range.commonAncestorContainer;
     
