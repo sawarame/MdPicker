@@ -19,6 +19,14 @@
     "message": "Copy Page as Markdown Link",
     "description": "Title for the page context menu item."
   },
+  "contextMenuCopyLinkAs": {
+    "message": "Copy Link as...",
+    "description": "Title for the parent context menu item to copy link in various formats."
+  },
+  "contextMenuCopyPageAs": {
+    "message": "Copy Page as...",
+    "description": "Title for the parent context menu item to copy page in various formats."
+  },
   "optionIncludeFavicon": {
     "message": "Include favicon in page link",
     "description": "Label for include favicon option."
@@ -30,5 +38,41 @@
   "optionFaviconSize": {
     "message": "Size:",
     "description": "Label for favicon size option."
+  },
+  "optionsTemplatesTitle": {
+    "message": "Format Templates",
+    "description": "Heading for format template settings."
+  },
+  "optionsTemplatesDesc": {
+    "message": "Manage formats available in the 'Copy Link/Page as...' menus and keyboard shortcut.",
+    "description": "Description for format template settings."
+  },
+  "optionsShortcutTemplate": {
+    "message": "Default format:",
+    "description": "Label for default format template selection."
+  },
+  "optionsResetTemplates": {
+    "message": "Reset to default templates",
+    "description": "Button to reset templates to defaults."
+  },
+  "optionsAddTemplate": {
+    "message": "Add",
+    "description": "Button to add a new template."
+  },
+  "optionsTemplateNamePlaceholder": {
+    "message": "Name (e.g. Notion)",
+    "description": "Placeholder for template name."
+  },
+  "optionsTemplateFormatPlaceholder": {
+    "message": "Format (e.g. [$${title}]($${url}))",
+    "description": "Placeholder for template format."
+  },
+  "optionsVariablesHelp": {
+    "message": "Available variables: $${title} (Title / Link text), $${url} (URL), $${date} (YYYY-MM-DD), $${time} (HH:mm), $${favicon} (Favicon URL)",
+    "description": "Help text explaining variables."
+  },
+  "optionsDelete": {
+    "message": "Delete",
+    "description": "Delete button label."
   }
 }
