@@ -19,6 +19,14 @@
     "message": "このページをリンクとしてコピー",
     "description": "ページ全体用コンテキストメニューの項目名。"
   },
+  "contextMenuCopyLinkAs": {
+    "message": "リンクを別形式でコピー",
+    "description": "リンクを別形式でコピーする親コンテキストメニューの項目名。"
+  },
+  "contextMenuCopyPageAs": {
+    "message": "このページを別形式でコピー",
+    "description": "ページを別形式でコピーする親コンテキストメニューの項目名。"
+  },
   "optionIncludeFavicon": {
     "message": "ページリンクにfaviconを含める",
     "description": "オプション画面：faviconを含めるかどうかのラベル。"
@@ -30,5 +38,41 @@
   "optionFaviconSize": {
     "message": "サイズ：",
     "description": "オプション画面：faviconサイズのラベル。"
+  },
+  "optionsTemplatesTitle": {
+    "message": "テンプレート設定",
+    "description": "オプション画面：テンプレート設定セクションの見出し。"
+  },
+  "optionsTemplatesDesc": {
+    "message": "右クリックの「リンク/ページを別形式でコピー」やショートカットで使用するフォーマットを管理します。",
+    "description": "オプション画面：テンプレート設定の説明。"
+  },
+  "optionsShortcutTemplate": {
+    "message": "デフォルトの形式：",
+    "description": "オプション画面：デフォルトテンプレート設定ラベル。"
+  },
+  "optionsResetTemplates": {
+    "message": "初期テンプレートに戻す",
+    "description": "オプション画面：初期設定へのリセットボタン。"
+  },
+  "optionsAddTemplate": {
+    "message": "追加",
+    "description": "オプション画面：テンプレート追加ボタン。"
+  },
+  "optionsTemplateNamePlaceholder": {
+    "message": "表示名（例: Notion）",
+    "description": "オプション画面：テンプレート名プレースホルダー。"
+  },
+  "optionsTemplateFormatPlaceholder": {
+    "message": "形式（例: [$${title}]($${url})）",
+    "description": "オプション画面：テンプレート形式プレースホルダー。"
+  },
+  "optionsVariablesHelp": {
+    "message": "利用可能な変数: $${title}（タイトル / リンクテキスト）, $${url}（URL）, $${date}（日付: YYYY-MM-DD）, $${time}（時刻: HH:mm）, $${favicon}（ファビコンURL）",
+    "description": "オプション画面：変数ヘルプ。"
+  },
+  "optionsDelete": {
+    "message": "削除",
+    "description": "オプション画面：削除ボタン。"
   }
 }
