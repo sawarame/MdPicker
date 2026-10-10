@@ -74,5 +74,21 @@
   "optionsDelete": {
     "message": "削除",
     "description": "オプション画面：削除ボタン。"
+  },
+  "optionsThName": {
+    "message": "名前",
+    "description": "オプション画面：テンプレート一覧の名前列ヘッダー。"
+  },
+  "optionsThMimeType": {
+    "message": "MIMEタイプ",
+    "description": "オプション画面：テンプレート一覧のMIMEタイプ列ヘッダー。"
+  },
+  "optionsThFormat": {
+    "message": "形式",
+    "description": "オプション画面：テンプレート一覧の形式列ヘッダー。"
+  },
+  "optionsThActions": {
+    "message": "操作",
+    "description": "オプション画面：テンプレート一覧の操作列ヘッダー。"
   }
 }

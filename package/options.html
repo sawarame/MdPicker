@@ -74,10 +74,16 @@
       color: #555;
     }
     .col-name {
-      width: 25%;
+      width: 20%;
+    }
+    .col-mimetype {
+      width: 18%;
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.82rem;
+      color: #555;
     }
     .col-format {
-      width: 60%;
+      width: 47%;
       font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
       font-size: 0.82rem;
       word-break: break-all;
@@ -104,10 +110,13 @@
       margin-bottom: 12px;
     }
     .add-form input[type="text"]:first-child {
-      width: 30%;
+      width: 22%;
     }
-    .add-form input[type="text"]:nth-child(2) {
-      width: 55%;
+    .add-form select {
+      width: 20%;
+    }
+    .add-form input[type="text"]:nth-of-type(2) {
+      flex: 1;
     }
     .btn-primary {
       background-color: #0366d6;
@@ -193,6 +202,7 @@
     <thead>
       <tr>
         <th class="col-name" id="th-name">Name</th>
+        <th class="col-mimetype" id="th-mimetype">MIME Type</th>
         <th class="col-format" id="th-format">Format</th>
         <th class="col-actions" id="th-actions">Actions</th>
       </tr>
@@ -202,6 +212,10 @@
 
   <div class="add-form">
     <input type="text" id="new-template-name" placeholder="Name">
+    <select id="new-template-mimetype">
+      <option value="text/plain">text/plain</option>
+      <option value="text/html">text/html</option>
+    </select>
     <input type="text" id="new-template-format" placeholder="Format">
     <button type="button" id="btn-add-template" class="btn-primary">Add</button>
   </div>

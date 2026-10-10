@@ -2,7 +2,7 @@
  * オプション画面の制御およびテンプレート管理を行うスクリプト。
  */
 
-import { FormatTemplate, DEFAULT_TEMPLATES } from './template';
+import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType } from './template';
 
 /**
  * 現在管理されているテンプレート一覧のインメモリ配列。
@@ -106,6 +106,12 @@ const renderTemplates = (): void => {
     tdName.textContent = template.name;
     tr.appendChild(tdName);
 
+    // MIMEタイプ
+    const tdMime = document.createElement('td');
+    tdMime.className = 'col-mimetype';
+    tdMime.textContent = template.mimeType || 'text/plain';
+    tr.appendChild(tdMime);
+
     // フォーマット文字列
     const tdFormat = document.createElement('td');
     tdFormat.className = 'col-format';
@@ -159,9 +165,11 @@ const deleteTemplate = (index: number): void => {
  */
 const addTemplate = (): void => {
   const nameInput = document.getElementById('new-template-name') as HTMLInputElement;
+  const mimeSelect = document.getElementById('new-template-mimetype') as HTMLSelectElement;
   const formatInput = document.getElementById('new-template-format') as HTMLInputElement;
 
   const name = nameInput.value.trim();
+  const mimeType = (mimeSelect ? mimeSelect.value : 'text/plain') as ClipboardMimeType;
   const format = formatInput.value.trim();
 
   if (!name || !format) {
@@ -172,12 +180,16 @@ const addTemplate = (): void => {
   const newTemplate: FormatTemplate = {
     id: `custom-${Date.now()}`,
     name: name,
-    format: format
+    format: format,
+    mimeType: mimeType
   };
 
   currentTemplates.push(newTemplate);
   nameInput.value = '';
   formatInput.value = '';
+  if (mimeSelect) {
+    mimeSelect.value = 'text/plain';
+  }
 
   saveTemplates();
 };
@@ -204,6 +216,10 @@ const applyLocalization = (): void => {
     { id: 'heading-templates', key: 'optionsTemplatesTitle' },
     { id: 'desc-templates', key: 'optionsTemplatesDesc' },
     { id: 'label-shortcut-template', key: 'optionsShortcutTemplate' },
+    { id: 'th-name', key: 'optionsThName' },
+    { id: 'th-mimetype', key: 'optionsThMimeType' },
+    { id: 'th-format', key: 'optionsThFormat' },
+    { id: 'th-actions', key: 'optionsThActions' },
     { id: 'btn-reset-templates', key: 'optionsResetTemplates' },
     { id: 'btn-add-template', key: 'optionsAddTemplate' },
     { id: 'variables-help', key: 'optionsVariablesHelp' }
@@ -250,9 +266,15 @@ const restoreOptions = (): void => {
       
       toggleSizeVisibility(items.includeFavicon);
 
-      currentTemplates = items.templates && items.templates.length > 0 
+      const rawTemplates = items.templates && items.templates.length > 0 
         ? items.templates 
         : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+
+      // 既存設定に mimeType が未設定の場合は補完（HTMLプリセットは text/html、その他は text/plain）
+      currentTemplates = rawTemplates.map((t: FormatTemplate) => ({
+        ...t,
+        mimeType: t.mimeType || (t.id === 'html' ? 'text/html' : 'text/plain')
+      }));
 
       renderTemplates();
     }
