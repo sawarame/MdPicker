@@ -128,14 +128,17 @@ async function setupOffscreenDocument(path: string): Promise<void> {
 /**
  * オフスクリーンドキュメント経由でテキストをクリップボードへ書き込みます。
  * @param text - クリップボードに書き込む文字列
+ * @param mimeType - 書き込み時のMIMEタイプ（'text/plain' または 'text/html'）
+ * @returns 処理完了のPromise
  */
-async function writeToOffscreenClipboard(text: string): Promise<void> {
+async function writeToOffscreenClipboard(text: string, mimeType: string = 'text/plain'): Promise<void> {
   try {
     await setupOffscreenDocument('offscreen.html');
     await chrome.runtime.sendMessage({
       type: 'copy-text-to-clipboard',
       target: 'offscreen',
-      data: text
+      data: text,
+      mimeType: mimeType
     });
     console.log('Text copied to clipboard successfully');
   } catch (err) {
@@ -225,6 +228,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
     const templateList: FormatTemplate[] = templates && templates.length > 0 ? templates : DEFAULT_TEMPLATES;
     const targetTemplate = templateList.find((t) => t.id === templateId) || templateList[0];
+    const mimeType = targetTemplate.mimeType || 'text/plain';
 
     // リンククリック時かページ余白クリック時かで分岐
     if (isLinkAction && info.linkUrl) {
@@ -246,7 +250,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         url: info.linkUrl,
         faviconUrl: faviconUrl
       });
-      await writeToOffscreenClipboard(formatted);
+      await writeToOffscreenClipboard(formatted, mimeType);
     } else if (tab && tab.url && tab.title) {
       const faviconUrl = getFaviconUrl(tab.url, faviconSize, tab.favIconUrl);
       const formatted = renderTemplate(targetTemplate.format, {
@@ -254,7 +258,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         url: tab.url,
         faviconUrl: faviconUrl
       });
-      await writeToOffscreenClipboard(formatted);
+      await writeToOffscreenClipboard(formatted, mimeType);
     }
   }
 });
@@ -278,6 +282,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
     }
 
     let resultText = '';
+    let resultMimeType = 'text/plain';
 
     // 選択範囲がある場合は選択範囲のMarkdown化を優先
     if (targetTab.id) {
@@ -285,6 +290,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
         const response = await chrome.tabs.sendMessage(targetTab.id, { type: 'GET_SMART_MARKDOWN' });
         if (response && response.markdown) {
           resultText = response.markdown;
+          resultMimeType = 'text/plain';
         }
       } catch (err) {
         console.warn('Could not get markdown from content script for shortcut.', err);
@@ -304,6 +310,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
         const templateList: FormatTemplate[] = templates && templates.length > 0 ? templates : DEFAULT_TEMPLATES;
         const targetTemplate = templateList.find((t) => t.id === shortcutTemplateId) || templateList[0];
         const faviconUrl = getFaviconUrl(targetTab.url, faviconSize, targetTab.favIconUrl);
+        resultMimeType = targetTemplate.mimeType || 'text/plain';
 
         // 標準Markdownでかつfavicon付与がONの場合は、favicon画像付きMarkdown形式を適用
         if (targetTemplate.id === 'markdown' && includeFavicon) {
@@ -321,11 +328,12 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
         }
       } else if (targetTab.url) {
         resultText = targetTab.url;
+        resultMimeType = 'text/plain';
       }
     }
 
     if (resultText) {
-      await writeToOffscreenClipboard(resultText);
+      await writeToOffscreenClipboard(resultText, resultMimeType);
     }
   }
 });

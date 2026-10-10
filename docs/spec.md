@@ -27,6 +27,11 @@
      * `${time}`: コピー時の時刻（`HH:mm`）
      * `${favicon}`: ページのファビコン画像URL
    * **テンプレート管理**: オプション画面で新しいテンプレートの追加、削除、初期プリセットへの復元が可能です。設定は `chrome.storage.sync` を通じて即座に反映・同期されます。
+   * **MIMEタイプ選択機能**:
+     * 各テンプレートごとに、クリップボード書き込み時のMIMEタイプ（`text/plain` または `text/html`）を設定できます。
+     * **`HTML` プリセット**: デフォルトで `text/html` に設定されており、Notion、Google ドキュメント、Microsoft Word、メールアプリ等のリッチテキスト入力欄へペーストした際、タグ文字列ではなく**クリック可能なハイパーリンク**として直接展開されます。
+     * **マルチMIME書き込み**: `text/html` を書き込む際は、プレーンテキスト専用エディタ（VS Codeやメモ帳など）への貼り付け互換性を維持するため、`ClipboardItem` を使用して `text/html` とフォールバック用の `text/plain`（HTML文字列）を同時にクリップボードへ格納します。
+     * **`Markdown` / `Slack` / `Scrapbox` プリセット**: `text/plain` として書き込まれます。
    * **デフォルト形式（ショートカット等）の選択**: キーボードショートカット (`Cmd+Shift+M` / `Ctrl+Shift+M`) 実行時などに適用するデフォルト形式を、登録されているテンプレートの中から自由に選択できます。
 
 3. **リンクテキストの取得仕様**
@@ -49,7 +54,7 @@
 
 7. **クリップボードへの書き込み仕様**
    * **課題**: Manifest V3 の Service Worker は DOM を持たないため、直接のコピー操作が制限されます。
-   * **解決策**: 「Offscreen Document API」を利用。不可視の `offscreen.html` を介して、確実なクリップボードアクセスを実現しています。
+   * **解決策**: 「Offscreen Document API」を利用。不可視の `offscreen.html` を介して確実なクリップボードアクセスを実現しています。さらに `ClipboardItem` API を用いて `text/html` とフォールバック用 `text/plain` のマルチMIME書き込みを行い、非対応環境向けには `textarea` + `execCommand` または `navigator.clipboard.writeText` によるフォールバック機構を備えています。
 
 8. **ビルド・デプロイ仕様 (CI/CD)**
    * **ビルド出力先**: ソースコード (`src/`) を Webpack と TypeScript でコンパイルし、拡張機能の本体は `package/` ディレクトリに出力される構成となっています。

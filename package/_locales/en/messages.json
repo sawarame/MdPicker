@@ -74,5 +74,21 @@
   "optionsDelete": {
     "message": "Delete",
     "description": "Delete button label."
+  },
+  "optionsThName": {
+    "message": "Name",
+    "description": "Table header for template name."
+  },
+  "optionsThMimeType": {
+    "message": "MIME Type",
+    "description": "Table header for MIME type."
+  },
+  "optionsThFormat": {
+    "message": "Format",
+    "description": "Table header for template format."
+  },
+  "optionsThActions": {
+    "message": "Actions",
+    "description": "Table header for actions."
   }
 }

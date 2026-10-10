@@ -3,6 +3,11 @@
  */
 
 /**
+ * クリップボードへの書き込み時に指定可能なMIMEタイプ。
+ */
+export type ClipboardMimeType = 'text/plain' | 'text/html';
+
+/**
  * フォーマットテンプレートの定義を表すインターフェース。
  */
 export interface FormatTemplate {
@@ -12,6 +17,8 @@ export interface FormatTemplate {
   name: string;
   /** テンプレートの書式文字列（例: '[${title}](${url})'） */
   format: string;
+  /** クリップボード書き込み時のMIMEタイプ（デフォルト: 'text/plain'） */
+  mimeType?: ClipboardMimeType;
 }
 
 /**
@@ -33,27 +40,32 @@ export const DEFAULT_TEMPLATES: FormatTemplate[] = [
   {
     id: 'markdown',
     name: 'Markdown',
-    format: '[${title}](${url})'
+    format: '[${title}](${url})',
+    mimeType: 'text/plain'
   },
   {
     id: 'slack',
     name: 'Slack',
-    format: '<${url}|${title}>'
+    format: '<${url}|${title}>',
+    mimeType: 'text/plain'
   },
   {
     id: 'scrapbox',
     name: 'Scrapbox',
-    format: '[${url} ${title}]'
+    format: '[${url} ${title}]',
+    mimeType: 'text/plain'
   },
   {
     id: 'html',
     name: 'HTML',
-    format: '<a href="${url}">${title}</a>'
+    format: '<a href="${url}">${title}</a>',
+    mimeType: 'text/html'
   },
   {
     id: 'markdown-date',
     name: 'Markdown (日付付き)',
-    format: '[${title}](${url}) (${date})'
+    format: '[${title}](${url}) (${date})',
+    mimeType: 'text/plain'
   }
 ];
 
