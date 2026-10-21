@@ -127,18 +127,20 @@ async function setupOffscreenDocument(path: string): Promise<void> {
 
 /**
  * オフスクリーンドキュメント経由でテキストをクリップボードへ書き込みます。
- * @param text - クリップボードに書き込む文字列
+ * @param text - クリップボードに書き込む文字列（HTMLまたはプレーンテキスト）
  * @param mimeType - 書き込み時のMIMEタイプ（'text/plain' または 'text/html'）
+ * @param plainText - リッチテキスト時のフォールバック用プレーンテキスト
  * @returns 処理完了のPromise
  */
-async function writeToOffscreenClipboard(text: string, mimeType: string = 'text/plain'): Promise<void> {
+async function writeToOffscreenClipboard(text: string, mimeType: string = 'text/plain', plainText?: string): Promise<void> {
   try {
     await setupOffscreenDocument('offscreen.html');
     await chrome.runtime.sendMessage({
       type: 'copy-text-to-clipboard',
       target: 'offscreen',
       data: text,
-      mimeType: mimeType
+      mimeType: mimeType,
+      plainText: plainText
     });
     console.log('Text copied to clipboard successfully');
   } catch (err) {
@@ -250,7 +252,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         url: info.linkUrl,
         faviconUrl: faviconUrl
       });
-      await writeToOffscreenClipboard(formatted, mimeType);
+      // リッチテキスト非対応エディタ用（text/plain）にもオプションで指定された形式（formatted）を渡す
+      await writeToOffscreenClipboard(formatted, mimeType, formatted);
     } else if (tab && tab.url && tab.title) {
       const faviconUrl = getFaviconUrl(tab.url, faviconSize, tab.favIconUrl);
       const formatted = renderTemplate(targetTemplate.format, {
@@ -258,7 +261,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         url: tab.url,
         faviconUrl: faviconUrl
       });
-      await writeToOffscreenClipboard(formatted, mimeType);
+      // リッチテキスト非対応エディタ用（text/plain）にもオプションで指定された形式（formatted）を渡す
+      await writeToOffscreenClipboard(formatted, mimeType, formatted);
     }
   }
 });
@@ -333,7 +337,8 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
     }
 
     if (resultText) {
-      await writeToOffscreenClipboard(resultText, resultMimeType);
+      // リッチテキスト非対応エディタ用（text/plain）にも生成されたテキスト（resultText）を渡す
+      await writeToOffscreenClipboard(resultText, resultMimeType, resultText);
     }
   }
 });
