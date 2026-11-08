@@ -2,7 +2,7 @@
  * バックグラウンド処理およびコンテキストメニュー、ショートカットキーのハンドリングを行うスクリプト。
  */
 
-import { FormatTemplate, DEFAULT_TEMPLATES, renderTemplate } from './template';
+import { FormatTemplate, DEFAULT_TEMPLATES, renderTemplate, isTemplatePinned } from './template';
 
 /**
  * 現在のタブまたはドメインからファビコンのURLを取得します。
@@ -22,67 +22,86 @@ function getFaviconUrl(tabUrl: string, faviconSize: string = '16', fallbackUrl?:
 
 /**
  * 保存されているテンプレート設定を読み込み、コンテキストメニューを再構築します。
+ * ピン留めされたテンプレートは第1階層（トップレベル）に直接登録し、
+ * 未ピン留めのテンプレートは「その他の形式でコピー」サブメニュー内に集約します。
  */
 async function setupContextMenus(): Promise<void> {
   chrome.contextMenus.removeAll(async () => {
-    // 既存の標準コンテキストメニュー（トップレベル）
-    chrome.contextMenus.create({
-      id: 'copy-as-markdown',
-      title: chrome.i18n.getMessage('contextMenuTitle'),
-      contexts: ['link']
-    });
-
-    chrome.contextMenus.create({
-      id: 'copy-selection-as-markdown',
-      title: chrome.i18n.getMessage('contextMenuSelection'),
-      contexts: ['selection']
-    });
-
-    chrome.contextMenus.create({
-      id: 'copy-page-as-markdown',
-      title: chrome.i18n.getMessage('contextMenuPage'),
-      contexts: ['page']
-    });
-
-    // 「リンクを別形式でコピー」親メニューの作成
-    chrome.contextMenus.create({
-      id: 'copy-link-as-template-parent',
-      title: chrome.i18n.getMessage('contextMenuCopyLinkAs') || 'リンクを別形式でコピー',
-      contexts: ['link']
-    });
-
-    // 「このページを別形式でコピー」親メニューの作成
-    chrome.contextMenus.create({
-      id: 'copy-page-as-template-parent',
-      title: chrome.i18n.getMessage('contextMenuCopyPageAs') || 'このページを別形式でコピー',
-      contexts: ['page']
-    });
-
     // ストレージからテンプレート一覧を取得
     const { templates } = await chrome.storage.sync.get({
       templates: DEFAULT_TEMPLATES
     });
 
     const templateList: FormatTemplate[] = templates && templates.length > 0 ? templates : DEFAULT_TEMPLATES;
+    const pinnedTemplates = templateList.filter(isTemplatePinned);
+    const unpinnedTemplates = templateList.filter((t) => !isTemplatePinned(t));
 
-    // 各テンプレートをサブメニューとして追加（リンク用およびページ用）
-    templateList.forEach((t) => {
-      // リンク用のサブ項目
+    // 1. リンク用コンテキストメニューの登録
+    // ピン留めされた形式をトップレベルに登録
+    pinnedTemplates.forEach((t) => {
+      const title = chrome.i18n.getMessage('contextMenuCopyLinkAsFormat', [t.name]) || `${t.name}形式でリンクをコピー`;
       chrome.contextMenus.create({
         id: `template:link:${t.id}`,
-        parentId: 'copy-link-as-template-parent',
-        title: t.name,
+        title: title,
+        contexts: ['link']
+      });
+    });
+
+    // 未ピン留めのテンプレートが1件以上存在する場合はサブメニュー内に格納
+    if (unpinnedTemplates.length > 0) {
+      const parentTitle = chrome.i18n.getMessage('contextMenuOtherFormatsLink') || 'その他の形式でコピー';
+      chrome.contextMenus.create({
+        id: 'copy-link-as-template-parent',
+        title: parentTitle,
         contexts: ['link']
       });
 
-      // ページ用のサブ項目
+      unpinnedTemplates.forEach((t) => {
+        chrome.contextMenus.create({
+          id: `template:link:${t.id}`,
+          parentId: 'copy-link-as-template-parent',
+          title: t.name,
+          contexts: ['link']
+        });
+      });
+    }
+
+    // 2. 選択テキスト用コンテキストメニュー（トップレベル）
+    chrome.contextMenus.create({
+      id: 'copy-selection-as-markdown',
+      title: chrome.i18n.getMessage('contextMenuSelection'),
+      contexts: ['selection']
+    });
+
+    // 3. ページ余白用コンテキストメニューの登録
+    // ピン留めされた形式をトップレベルに登録
+    pinnedTemplates.forEach((t) => {
+      const title = chrome.i18n.getMessage('contextMenuCopyPageAsFormat', [t.name]) || `${t.name}形式でページをコピー`;
       chrome.contextMenus.create({
         id: `template:page:${t.id}`,
-        parentId: 'copy-page-as-template-parent',
-        title: t.name,
+        title: title,
         contexts: ['page']
       });
     });
+
+    // 未ピン留めのテンプレートが1件以上存在する場合はサブメニュー内に格納
+    if (unpinnedTemplates.length > 0) {
+      const parentTitle = chrome.i18n.getMessage('contextMenuOtherFormatsPage') || 'その他の形式でコピー';
+      chrome.contextMenus.create({
+        id: 'copy-page-as-template-parent',
+        title: parentTitle,
+        contexts: ['page']
+      });
+
+      unpinnedTemplates.forEach((t) => {
+        chrome.contextMenus.create({
+          id: `template:page:${t.id}`,
+          parentId: 'copy-page-as-template-parent',
+          title: t.name,
+          contexts: ['page']
+        });
+      });
+    }
   });
 }
 
@@ -255,12 +274,18 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       // リッチテキスト非対応エディタ用（text/plain）にもオプションで指定された形式（formatted）を渡す
       await writeToOffscreenClipboard(formatted, mimeType, formatted);
     } else if (tab && tab.url && tab.title) {
+      const { includeFavicon } = await chrome.storage.sync.get({ includeFavicon: false });
       const faviconUrl = getFaviconUrl(tab.url, faviconSize, tab.favIconUrl);
-      const formatted = renderTemplate(targetTemplate.format, {
-        title: tab.title,
-        url: tab.url,
-        faviconUrl: faviconUrl
-      });
+      let formatted: string;
+      if (targetTemplate.id === 'markdown' && includeFavicon) {
+        formatted = faviconUrl ? `![favicon](${faviconUrl}) [${tab.title}](${tab.url})` : `[${tab.title}](${tab.url})`;
+      } else {
+        formatted = renderTemplate(targetTemplate.format, {
+          title: tab.title,
+          url: tab.url,
+          faviconUrl: faviconUrl
+        });
+      }
       // リッチテキスト非対応エディタ用（text/plain）にもオプションで指定された形式（formatted）を渡す
       await writeToOffscreenClipboard(formatted, mimeType, formatted);
     }

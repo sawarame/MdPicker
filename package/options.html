@@ -73,23 +73,30 @@
       font-weight: 600;
       color: #555;
     }
+    .col-pinned {
+      width: 14%;
+      text-align: center;
+    }
     .col-name {
-      width: 20%;
+      width: 18%;
     }
     .col-mimetype {
-      width: 18%;
+      width: 16%;
       font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
       font-size: 0.82rem;
       color: #555;
     }
     .col-format {
-      width: 47%;
+      width: 40%;
       font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
       font-size: 0.82rem;
       word-break: break-all;
     }
     .col-actions {
-      width: 15%;
+      width: 12%;
+      text-align: center;
+    }
+    .cell-pinned {
       text-align: center;
     }
     .btn-delete {
@@ -201,6 +208,7 @@
   <table>
     <thead>
       <tr>
+        <th class="col-pinned" id="th-pinned">Pin to top</th>
         <th class="col-name" id="th-name">Name</th>
         <th class="col-mimetype" id="th-mimetype">MIME Type</th>
         <th class="col-format" id="th-format">Format</th>

@@ -2,7 +2,7 @@
  * オプション画面の制御およびテンプレート管理を行うスクリプト。
  */
 
-import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType } from './template';
+import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType, isTemplatePinned } from './template';
 
 /**
  * 現在管理されているテンプレート一覧のインメモリ配列。
@@ -100,6 +100,20 @@ const renderTemplates = (): void => {
   currentTemplates.forEach((template, index) => {
     const tr = document.createElement('tr');
 
+    // ピン留め（トップレベル表示）
+    const tdPinned = document.createElement('td');
+    tdPinned.className = 'col-pinned cell-pinned';
+    const pinCheckbox = document.createElement('input');
+    pinCheckbox.type = 'checkbox';
+    pinCheckbox.checked = isTemplatePinned(template);
+    pinCheckbox.title = chrome.i18n.getMessage('optionsThPinned') || 'トップレベル';
+    pinCheckbox.addEventListener('change', () => {
+      template.pinned = pinCheckbox.checked;
+      saveTemplates();
+    });
+    tdPinned.appendChild(pinCheckbox);
+    tr.appendChild(tdPinned);
+
     // テンプレート名
     const tdName = document.createElement('td');
     tdName.className = 'col-name';
@@ -181,7 +195,8 @@ const addTemplate = (): void => {
     id: `custom-${Date.now()}`,
     name: name,
     format: format,
-    mimeType: mimeType
+    mimeType: mimeType,
+    pinned: false
   };
 
   currentTemplates.push(newTemplate);
@@ -216,6 +231,7 @@ const applyLocalization = (): void => {
     { id: 'heading-templates', key: 'optionsTemplatesTitle' },
     { id: 'desc-templates', key: 'optionsTemplatesDesc' },
     { id: 'label-shortcut-template', key: 'optionsShortcutTemplate' },
+    { id: 'th-pinned', key: 'optionsThPinned' },
     { id: 'th-name', key: 'optionsThName' },
     { id: 'th-mimetype', key: 'optionsThMimeType' },
     { id: 'th-format', key: 'optionsThFormat' },
@@ -270,10 +286,11 @@ const restoreOptions = (): void => {
         ? items.templates 
         : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
 
-      // 既存設定に mimeType が未設定の場合は補完（HTMLプリセットは text/html、その他は text/plain）
+      // 既存設定に mimeType や pinned が未設定の場合は補完（HTMLプリセットは text/html、その他は text/plain）
       currentTemplates = rawTemplates.map((t: FormatTemplate) => ({
         ...t,
-        mimeType: t.mimeType || (t.id === 'html' ? 'text/html' : 'text/plain')
+        mimeType: t.mimeType || (t.id === 'html' ? 'text/html' : 'text/plain'),
+        pinned: isTemplatePinned(t)
       }));
 
       renderTemplates();

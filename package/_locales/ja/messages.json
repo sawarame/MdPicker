@@ -90,5 +90,37 @@
   "optionsThActions": {
     "message": "操作",
     "description": "オプション画面：テンプレート一覧の操作列ヘッダー。"
+  },
+  "optionsThPinned": {
+    "message": "トップレベル",
+    "description": "オプション画面：テンプレート一覧のトップレベル表示（ピン留め）列ヘッダー。"
+  },
+  "contextMenuCopyLinkAsFormat": {
+    "message": "$FORMAT$形式でリンクをコピー",
+    "description": "トップレベルのリンクコピー用コンテキストメニューの項目名。",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuCopyPageAsFormat": {
+    "message": "$FORMAT$形式でページをコピー",
+    "description": "トップレベルのページコピー用コンテキストメニューの項目名。",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuOtherFormatsLink": {
+    "message": "その他の形式でコピー",
+    "description": "リンク用の未ピン留めテンプレートをまとめるサブメニュー項目名。"
+  },
+  "contextMenuOtherFormatsPage": {
+    "message": "その他の形式でコピー",
+    "description": "ページ用の未ピン留めテンプレートをまとめるサブメニュー項目名。"
   }
 }
