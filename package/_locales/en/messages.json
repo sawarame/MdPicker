@@ -55,6 +55,10 @@
     "message": "Reset to default templates",
     "description": "Button to reset templates to defaults."
   },
+  "optionsResetConfirm": {
+    "message": "Click again to confirm reset",
+    "description": "Confirmation message for resetting templates."
+  },
   "optionsAddTemplate": {
     "message": "Add",
     "description": "Button to add a new template."
@@ -90,5 +94,37 @@
   "optionsThActions": {
     "message": "Actions",
     "description": "Table header for actions."
+  },
+  "optionsThPinned": {
+    "message": "Pin to top",
+    "description": "Table header for pinning template to top level context menu."
+  },
+  "contextMenuCopyLinkAsFormat": {
+    "message": "Copy Link as $FORMAT$",
+    "description": "Title for the top-level link copy context menu item.",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuCopyPageAsFormat": {
+    "message": "Copy Page as $FORMAT$",
+    "description": "Title for the top-level page copy context menu item.",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuOtherFormatsLink": {
+    "message": "Copy link in other formats...",
+    "description": "Title for the link sub-menu containing unpinned templates."
+  },
+  "contextMenuOtherFormatsPage": {
+    "message": "Copy page in other formats...",
+    "description": "Title for the page sub-menu containing unpinned templates."
   }
 }

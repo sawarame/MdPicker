@@ -19,6 +19,8 @@ export interface FormatTemplate {
   format: string;
   /** クリップボード書き込み時のMIMEタイプ（デフォルト: 'text/plain'） */
   mimeType?: ClipboardMimeType;
+  /** コンテキストメニューの第1階層（トップレベル）にピン留め表示するかどうか（デフォルト: false） */
+  pinned?: boolean;
 }
 
 /**
@@ -41,33 +43,51 @@ export const DEFAULT_TEMPLATES: FormatTemplate[] = [
     id: 'markdown',
     name: 'Markdown',
     format: '[${title}](${url})',
-    mimeType: 'text/plain'
+    mimeType: 'text/plain',
+    pinned: true
   },
   {
     id: 'slack',
     name: 'Slack',
     format: '<${url}|${title}>',
-    mimeType: 'text/plain'
+    mimeType: 'text/plain',
+    pinned: false
   },
   {
     id: 'scrapbox',
     name: 'Scrapbox',
     format: '[${url} ${title}]',
-    mimeType: 'text/plain'
+    mimeType: 'text/plain',
+    pinned: false
   },
   {
     id: 'html',
     name: 'HTML',
     format: '<a href="${url}">${title}</a>',
-    mimeType: 'text/html'
+    mimeType: 'text/html',
+    pinned: false
   },
   {
     id: 'markdown-date',
     name: 'Markdown (日付付き)',
     format: '[${title}](${url}) (${date})',
-    mimeType: 'text/plain'
+    mimeType: 'text/plain',
+    pinned: false
   }
 ];
+
+/**
+ * テンプレートがコンテキストメニューのトップレベルにピン留めされているかを判定します。
+ * pinned プロパティが未定義の場合は、後方互換性のため id === 'markdown' のみをピン留め対象（true）とみなします。
+ * @param template - 判定対象のフォーマットテンプレート
+ * @returns ピン留めされている場合は true、それ以外は false
+ */
+export function isTemplatePinned(template: FormatTemplate): boolean {
+  if (typeof template.pinned === 'boolean') {
+    return template.pinned;
+  }
+  return template.id === 'markdown';
+}
 
 /**
  * 数値を2桁のゼロ埋め文字列に変換します。

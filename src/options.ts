@@ -2,7 +2,7 @@
  * オプション画面の制御およびテンプレート管理を行うスクリプト。
  */
 
-import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType } from './template';
+import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType, isTemplatePinned } from './template';
 
 /**
  * 現在管理されているテンプレート一覧のインメモリ配列。
@@ -16,9 +16,27 @@ const showSavedStatus = (): void => {
   const status = document.getElementById('status');
   if (status) {
     status.textContent = chrome.i18n.getMessage('optionsSaved');
+    status.style.color = '#28a745';
     setTimeout(() => {
       status.textContent = '';
+      status.style.color = '';
     }, 1000);
+  }
+};
+
+/**
+ * エラーステータスを表示します。
+ * @param message - 表示するエラーメッセージ文字列
+ */
+const showErrorStatus = (message: string): void => {
+  const status = document.getElementById('status');
+  if (status) {
+    status.textContent = message;
+    status.style.color = '#d73a49';
+    setTimeout(() => {
+      status.textContent = '';
+      status.style.color = '';
+    }, 3000);
   }
 };
 
@@ -100,6 +118,20 @@ const renderTemplates = (): void => {
   currentTemplates.forEach((template, index) => {
     const tr = document.createElement('tr');
 
+    // ピン留め（トップレベル表示）
+    const tdPinned = document.createElement('td');
+    tdPinned.className = 'col-pinned cell-pinned';
+    const pinCheckbox = document.createElement('input');
+    pinCheckbox.type = 'checkbox';
+    pinCheckbox.checked = isTemplatePinned(template);
+    pinCheckbox.title = chrome.i18n.getMessage('optionsThPinned') || 'トップレベル';
+    pinCheckbox.addEventListener('change', () => {
+      template.pinned = pinCheckbox.checked;
+      saveTemplates();
+    });
+    tdPinned.appendChild(pinCheckbox);
+    tr.appendChild(tdPinned);
+
     // テンプレート名
     const tdName = document.createElement('td');
     tdName.className = 'col-name';
@@ -146,7 +178,7 @@ const renderTemplates = (): void => {
  */
 const deleteTemplate = (index: number): void => {
   if (currentTemplates.length <= 1) {
-    alert('少なくとも1つのテンプレートが必要です。');
+    showErrorStatus('少なくとも1つのテンプレートが必要です。');
     return;
   }
   const deleted = currentTemplates.splice(index, 1)[0];
@@ -173,7 +205,7 @@ const addTemplate = (): void => {
   const format = formatInput.value.trim();
 
   if (!name || !format) {
-    alert('名前と形式を両方入力してください。');
+    showErrorStatus('名前と形式を両方入力してください。');
     return;
   }
 
@@ -181,7 +213,8 @@ const addTemplate = (): void => {
     id: `custom-${Date.now()}`,
     name: name,
     format: format,
-    mimeType: mimeType
+    mimeType: mimeType,
+    pinned: false
   };
 
   currentTemplates.push(newTemplate);
@@ -194,16 +227,59 @@ const addTemplate = (): void => {
   saveTemplates();
 };
 
+/** リセット確認待機中かどうかのフラグ */
+let isResetConfirming = false;
+/** リセット確認タイマーID */
+let resetTimer: number | null = null;
+
 /**
  * テンプレートを初期プリセットにリセットします。
+ * 埋め込み options_ui でも確実に動作するよう、ブラウザの confirm() に依存せず
+ * ボタンのインライン切り替えによる2段階確認を行います。
  */
 const resetTemplates = (): void => {
-  if (confirm('テンプレート一覧を初期状態に戻しますか？')) {
-    currentTemplates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
-    chrome.storage.sync.set({ shortcutTemplateId: 'markdown' }, () => {
-      saveTemplates();
-    });
+  const btn = document.getElementById('btn-reset-templates') as HTMLButtonElement;
+  if (!btn) return;
+
+  if (!isResetConfirming) {
+    // 1回目のクリック: 確認状態へ移行
+    isResetConfirming = true;
+    const confirmMsg = chrome.i18n.getMessage('optionsResetConfirm') || '本当に初期状態に戻しますか？（再度クリック）';
+    btn.textContent = confirmMsg;
+    btn.style.backgroundColor = '#d73a49';
+    btn.style.color = '#ffffff';
+    btn.style.borderColor = '#d73a49';
+
+    // 4秒間再クリックがなければ通常表示に戻す
+    if (resetTimer !== null) {
+      window.clearTimeout(resetTimer);
+    }
+    resetTimer = window.setTimeout(() => {
+      isResetConfirming = false;
+      resetTimer = null;
+      btn.textContent = chrome.i18n.getMessage('optionsResetTemplates') || '初期テンプレートに戻す';
+      btn.style.backgroundColor = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 4000);
+    return;
   }
+
+  // 2回目のクリック: リセット処理を実行
+  if (resetTimer !== null) {
+    window.clearTimeout(resetTimer);
+    resetTimer = null;
+  }
+  isResetConfirming = false;
+  btn.textContent = chrome.i18n.getMessage('optionsResetTemplates') || '初期テンプレートに戻す';
+  btn.style.backgroundColor = '';
+  btn.style.color = '';
+  btn.style.borderColor = '';
+
+  currentTemplates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+  chrome.storage.sync.set({ shortcutTemplateId: 'markdown' }, () => {
+    saveTemplates();
+  });
 };
 
 /**
@@ -216,6 +292,7 @@ const applyLocalization = (): void => {
     { id: 'heading-templates', key: 'optionsTemplatesTitle' },
     { id: 'desc-templates', key: 'optionsTemplatesDesc' },
     { id: 'label-shortcut-template', key: 'optionsShortcutTemplate' },
+    { id: 'th-pinned', key: 'optionsThPinned' },
     { id: 'th-name', key: 'optionsThName' },
     { id: 'th-mimetype', key: 'optionsThMimeType' },
     { id: 'th-format', key: 'optionsThFormat' },
@@ -270,10 +347,11 @@ const restoreOptions = (): void => {
         ? items.templates 
         : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
 
-      // 既存設定に mimeType が未設定の場合は補完（HTMLプリセットは text/html、その他は text/plain）
+      // 既存設定に mimeType や pinned が未設定の場合は補完（HTMLプリセットは text/html、その他は text/plain）
       currentTemplates = rawTemplates.map((t: FormatTemplate) => ({
         ...t,
-        mimeType: t.mimeType || (t.id === 'html' ? 'text/html' : 'text/plain')
+        mimeType: t.mimeType || (t.id === 'html' ? 'text/html' : 'text/plain'),
+        pinned: isTemplatePinned(t)
       }));
 
       renderTemplates();
