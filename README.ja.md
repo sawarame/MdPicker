@@ -35,22 +35,25 @@
 3. Chrome を開き、URL ボックスに `chrome://extensions/` と入力して拡張機能管理画面を開きます。
 4. 画面右上の **「デベロッパー モード」** のトグルスイッチを **オン(有効)** にします。
 5. 画面左上の **「パッケージ化されていない拡張機能を読み込む」** をクリックします。
-6. ビルド出力ディレクトリである `MdPicker/MdPicker` （直下に `manifest.json` のあるフォルダ！）を選択します。
+6. 拡張機能本体のディレクトリである `MdPicker/package` （直下に `manifest.json` のあるフォルダ！）を選択します。
 7. インストール完了です。ブラウザのアドレスバー横に拡張機能のアイコンが追加されていることを確認できます。
 
 ## 🛠️ 開発（Development）
 
-本プロジェクトは **TypeScript** と **Webpack** を使用してビルドされています。
+本プロジェクトは **TypeScript** と **Webpack** を使用してビルドされています。また、**Spec Kit** による仕様駆動開発を採用しています。
 
 ```bash
 # 依存するパッケージのインストール
 npm install
 
-# 本番用のビルド（コードを最小化して出力）
+# 本番用のビルド（コードを最小化して出力し、package.zip を作成）
 npm run build
 
 # 開発用の監視ビルド（コード変更のたびに自動ビルド）
 npm run dev
 ```
 
-詳細な技術アーキテクチャやルール設定は `SPEC.md` および `GEMINI.md` をご参照ください。
+設計原則、アーキテクチャ制約、コーディング規約、および詳細な仕様については以下をご参照ください：
+- **プロジェクト憲章 (Constitution)**: [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
+- **機能仕様書**: [`docs/spec.md`](./docs/spec.md)
+- **AIエージェント・開発ルール**: [`AGENTS.md`](./AGENTS.md)
