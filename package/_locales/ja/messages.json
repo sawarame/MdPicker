@@ -55,6 +55,10 @@
     "message": "初期テンプレートに戻す",
     "description": "オプション画面：初期設定へのリセットボタン。"
   },
+  "optionsResetConfirm": {
+    "message": "本当に初期状態に戻しますか？（再度クリック）",
+    "description": "オプション画面：リセット確認メッセージ。"
+  },
   "optionsAddTemplate": {
     "message": "追加",
     "description": "オプション画面：テンプレート追加ボタン。"

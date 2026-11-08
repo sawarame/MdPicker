@@ -55,6 +55,10 @@
     "message": "Reset to default templates",
     "description": "Button to reset templates to defaults."
   },
+  "optionsResetConfirm": {
+    "message": "Click again to confirm reset",
+    "description": "Confirmation message for resetting templates."
+  },
   "optionsAddTemplate": {
     "message": "Add",
     "description": "Button to add a new template."
