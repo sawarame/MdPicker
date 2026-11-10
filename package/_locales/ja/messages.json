@@ -126,5 +126,9 @@
   "contextMenuOtherFormatsPage": {
     "message": "その他の形式でコピー",
     "description": "ページ用の未ピン留めテンプレートをまとめるサブメニュー項目名。"
+  },
+  "optionsOpenInTab": {
+    "message": "新しいタブで開く",
+    "description": "オプション画面：ポップアップから新しいタブで開くボタンのツールチップ。"
   }
 }

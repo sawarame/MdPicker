@@ -60,7 +60,13 @@
    * **課題**: Manifest V3 の Service Worker は DOM を持たないため、直接のコピー操作が制限されます。
    * **解決策**: 「Offscreen Document API」を利用。不可視の `offscreen.html` を介して確実なクリップボードアクセスを実現しています。さらに `ClipboardItem` API を用いて `text/html` とフォールバック用 `text/plain` のマルチMIME書き込みを行い、非対応環境向けには `textarea` + `execCommand` または `navigator.clipboard.writeText` によるフォールバック機構を備えています。
 
-8. **ビルド・デプロイ仕様 (CI/CD)**
+8. **オプション画面のポップアップ表示仕様**
+   * **概要**: ブラウザのツールバーにある MdPicker アイコンを左クリックすることで、閲覧中のWebページから移動することなく、即座にドロップダウン形式のポップアップとしてオプション画面を表示できます。
+   * **レスポンシブデザイン**: ポップアップ表示枠（幅約480px〜540px）に最適化されたレイアウトが適用され、ファビコン設定、テンプレート一覧テーブル、テンプレート追加フォームなどの全機能が横スクロールなしで利用可能です。
+   * **別タブ展開機能**: ポップアップのヘッダー右上に「新しいタブで開く」ボタンを配置。クリック時に `chrome.runtime.openOptionsPage()` を呼び出すことで、広い画面で設定を行いたい場合にワンクリックで独立したブラウザタブとして開くことができます。
+   * **既存アクセス経路の完全互換**: 右クリックメニューの「オプション」や、拡張機能管理ページ（`chrome://extensions/`）からの設定画面アクセスも従来通り利用可能です。
+
+9. **ビルド・デプロイ仕様 (CI/CD)**
    * **ビルド出力先**: ソースコード (`src/`) を Webpack と TypeScript でコンパイルし、拡張機能の本体は `package/` ディレクトリに出力される構成となっています。
    * **自動公開 (GitHub Actions)**: リリース作成時に、`chrome-webstore-upload-cli` を利用して Chrome Web Store への自動アップロードおよび審査提出を行う CI/CD パイプラインが構築されています。
 
@@ -68,6 +74,7 @@
 
 * **`manifest.json`**:
   * 権限 (`permissions`): `contextMenus`, `clipboardWrite`, `offscreen`, `tabs`, `storage`
+  * ツールバーアクション (`action`): `default_popup` に `options.html` を指定し、ツールバーアイコンから即座にオプション画面を起動可能。
   * 設定画面: `options_ui` を定義。
 
 * **`src/template.ts`**:
@@ -81,7 +88,7 @@
   * リンク要素の特定とテキスト抽出、および `turndown` による選択範囲のMarkdown変換を担当。
 
 * **`src/options.ts` / `options.html`**:
-  * ユーザー設定（faviconの利用有無・サイズ、テンプレートの追加/削除/リセット、ショートカット用テンプレートの選択）の保存・管理を担当。設定は `chrome.storage.sync` で同期されます。
+  * ユーザー設定（faviconの利用有無・サイズ、テンプレートの追加/削除/リセット、ショートカット用テンプレートの選択）の保存・管理を担当。ポップアップ表示モードとフルタブ表示モードの双方に対応したレスポンシブなUIを提供し、設定は `chrome.storage.sync` で同期されます。ヘッダーから `chrome.runtime.openOptionsPage()` による別タブ起動もサポート。
 
 * **`offscreen.html` / `src/offscreen.ts`**:
   * Service Worker からのメッセージを受け取り、クリップボードへの書き込みを実行。
