@@ -16,8 +16,8 @@
 
 **目的**: 本機能で追加する「別タブで開く」操作ボタンのラベルおよび多言語メッセージを準備する。
 
-- [ ] T001 [P] 多言語リソースファイルに「別タブで開く」用メッセージキー（optionsOpenInTab）を追加する in package/_locales/ja/messages.json
-- [ ] T002 [P] 多言語リソースファイルに「別タブで開く」用英語メッセージキーを追加する in package/_locales/en/messages.json
+- [X] T001 [P] 多言語リソースファイルに「別タブで開く」用メッセージキー（optionsOpenInTab）を追加する in package/_locales/ja/messages.json
+- [X] T002 [P] 多言語リソースファイルに「別タブで開く」用英語メッセージキーを追加する in package/_locales/en/messages.json
 
 ---
 
@@ -27,7 +27,7 @@
 
 **⚠️ CRITICAL**: このフェーズが完了するまでユーザーストーリーの実装は開始できません。
 
-- [ ] T003 manifest.json に action 定義（default_popup: "options.html", default_icon, default_title）を追加する in package/manifest.json
+- [X] T003 manifest.json に action 定義（default_popup: "options.html", default_icon, default_title）を追加する in package/manifest.json
 
 **Checkpoint**: 拡張機能アイコンから options.html をポップアップとして起動可能になる。
 
@@ -41,7 +41,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] options.html の body スタイルにポップアップ基準の幅（min-width: 480px; max-width: 540px;）および適切なパディングを適用する in package/options.html
+- [X] T004 [US1] options.html の body スタイルにポップアップ基準の幅（min-width: 480px; max-width: 540px;）および適切なパディングを適用する in package/options.html
 
 **Checkpoint**: User Story 1 が単体で動作し、ツールバーアイコンからポップアップ表示が可能になる (MVP)。
 
@@ -55,9 +55,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T005 [P] [US2] テンプレート一覧テーブルのカラム幅比率（col-pinned, col-name, col-mimetype, col-format, col-actions）および折り返しスタイルをポップアップ向けに最適化する in package/options.html
-- [ ] T006 [P] [US2] テンプレート追加フォーム（.add-form）に flex-wrap: wrap および入力要素のレスポンシブ幅スタイルを追加する in package/options.html
-- [ ] T007 [US2] ポップアップ内での各入力イベントによる chrome.storage.sync への保存とステータス表示が正常に機能することを確認・調整する in src/options.ts
+- [X] T005 [P] [US2] テンプレート一覧テーブルのカラム幅比率（col-pinned, col-name, col-mimetype, col-format, col-actions）および折り返しスタイルをポップアップ向けに最適化する in package/options.html
+- [X] T006 [P] [US2] テンプレート追加フォーム（.add-form）に flex-wrap: wrap および入力要素のレスポンシブ幅スタイルを追加する in package/options.html
+- [X] T007 [US2] ポップアップ内での各入力イベントによる chrome.storage.sync への保存とステータス表示が正常に機能することを確認・調整する in src/options.ts
 
 **Checkpoint**: ポップアップ内だけで既存のオプション機能がすべて完結して操作できるようになる。
 
@@ -71,9 +71,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T008 [US3] options.html の上部にヘッダーコンテナ（.options-header）、タイトル（#options-title）、および「別タブで開く」ボタン（#btn-open-tab）のマークアップとスタイルを追加する in package/options.html
-- [ ] T009 [US3] options.ts に #btn-open-tab のクリックイベントリスナーを登録し chrome.runtime.openOptionsPage() を呼び出す処理を実装する in src/options.ts
-- [ ] T010 [US3] options.ts の applyLocalization() に「別タブで開く」ボタンのツールチップ・アクセシビリティラベルの多言語適用を追加する in src/options.ts
+- [X] T008 [US3] options.html の上部にヘッダーコンテナ（.options-header）、タイトル（#options-title）、および「別タブで開く」ボタン（#btn-open-tab）のマークアップとスタイルを追加する in package/options.html
+- [X] T009 [US3] options.ts に #btn-open-tab のクリックイベントリスナーを登録し chrome.runtime.openOptionsPage() を呼び出す処理を実装する in src/options.ts
+- [X] T010 [US3] options.ts の applyLocalization() に「別タブで開く」ボタンのツールチップ・アクセシビリティラベルの多言語適用を追加する in src/options.ts
 
 **Checkpoint**: すべてのユーザーストーリー（US1, US2, US3）が完全に統合され、独立して検証可能になる。
 
@@ -83,9 +83,9 @@
 
 **目的**: ビルドの検証、全シナリオの動作テスト、およびプロジェクト全体の仕様書の更新。
 
-- [ ] T011 Webpackビルドを実行し TypeScript コンパイルエラーおよびバンドル出力を検証する in webpack.config.js
-- [ ] T012 [P] quickstart.md の検証シナリオ（ポップアップ起動、設定変更、別タブ展開、既存メニュー互換）を実施する in specs/002-options-popup/quickstart.md
-- [ ] T013 [P] プロジェクト全体の機能仕様書 docs/spec.md にポップアップ表示機能および manifest 設定の変更を反映する in docs/spec.md
+- [X] T011 Webpackビルドを実行し TypeScript コンパイルエラーおよびバンドル出力を検証する in webpack.config.js
+- [X] T012 [P] quickstart.md の検証シナリオ（ポップアップ起動、設定変更、別タブ展開、既存メニュー互換）を実施する in specs/002-options-popup/quickstart.md
+- [X] T013 [P] プロジェクト全体の機能仕様書 docs/spec.md にポップアップ表示機能および manifest 設定の変更を反映する in docs/spec.md
 
 ---
 

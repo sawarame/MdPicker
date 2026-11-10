@@ -5,13 +5,51 @@
   <title>MdPicker Options</title>
   <style>
     body {
-      padding: 24px;
+      padding: 16px 20px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: #333;
-      min-width: 640px;
-      max-width: 840px;
+      min-width: 480px;
+      max-width: 540px;
       margin: 0 auto;
       line-height: 1.5;
+      box-sizing: border-box;
+    }
+    @media (min-width: 700px) {
+      body {
+        max-width: 840px;
+        padding: 24px;
+      }
+    }
+    .options-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eaeaea;
+    }
+    .options-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      color: #1a1a1a;
+    }
+    .btn-icon {
+      background: none;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .btn-icon:hover {
+      background-color: #f3f4f6;
+      color: #0366d6;
+      border-color: #0366d6;
     }
     h2 {
       font-size: 1.15rem;
@@ -61,10 +99,10 @@
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 14px;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
     }
     th, td {
-      padding: 8px 10px;
+      padding: 6px 8px;
       text-align: left;
       border-bottom: 1px solid #eee;
     }
@@ -74,22 +112,23 @@
       color: #555;
     }
     .col-pinned {
-      width: 14%;
+      width: 11%;
       text-align: center;
     }
     .col-name {
-      width: 18%;
+      width: 22%;
+      word-break: break-word;
     }
     .col-mimetype {
-      width: 16%;
+      width: 17%;
       font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: #555;
     }
     .col-format {
-      width: 40%;
+      width: 38%;
       font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       word-break: break-all;
     }
     .col-actions {
@@ -105,7 +144,7 @@
       color: #d73a49;
       cursor: pointer;
       font-size: 0.82rem;
-      padding: 4px 8px;
+      padding: 4px 6px;
       border-radius: 3px;
     }
     .btn-delete:hover {
@@ -113,17 +152,23 @@
     }
     .add-form {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 12px;
     }
     .add-form input[type="text"]:first-child {
-      width: 22%;
+      flex: 1 1 110px;
+      min-width: 90px;
     }
     .add-form select {
-      width: 20%;
+      flex: 0 0 100px;
     }
     .add-form input[type="text"]:nth-of-type(2) {
-      flex: 1;
+      flex: 2 1 160px;
+      min-width: 120px;
+    }
+    .add-form .btn-primary {
+      flex: 0 0 auto;
     }
     .btn-primary {
       background-color: #0366d6;
@@ -182,6 +227,17 @@
   </style>
 </head>
 <body>
+  <header class="options-header">
+    <h1 class="options-title" id="options-title">MdPicker</h1>
+    <button type="button" id="btn-open-tab" class="btn-icon" title="Open in new tab" aria-label="Open in new tab">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <polyline points="15 3 21 3 21 9"></polyline>
+        <line x1="10" y1="14" x2="21" y2="3"></line>
+      </svg>
+    </button>
+  </header>
+
   <div class="option-item">
     <input type="checkbox" id="include-favicon">
     <label for="include-favicon" id="label-include-favicon">Include favicon in page link</label>

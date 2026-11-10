@@ -319,6 +319,20 @@ const applyLocalization = (): void => {
   if (formatInput) {
     formatInput.placeholder = chrome.i18n.getMessage('optionsTemplateFormatPlaceholder') || 'Format';
   }
+
+  const btnOpenTab = document.getElementById('btn-open-tab');
+  if (btnOpenTab) {
+    const openInTabMsg = chrome.i18n.getMessage('optionsOpenInTab') || 'Open in new tab';
+    btnOpenTab.title = openInTabMsg;
+    btnOpenTab.setAttribute('aria-label', openInTabMsg);
+  }
+};
+
+/**
+ * オプション画面を新しいブラウザタブで開きます。
+ */
+const openInTab = (): void => {
+  chrome.runtime.openOptionsPage();
 };
 
 /**
@@ -386,3 +400,4 @@ document.getElementById('favicon-size')?.addEventListener('change', saveBaseOpti
 document.getElementById('shortcut-template')?.addEventListener('change', saveShortcutOption);
 document.getElementById('btn-add-template')?.addEventListener('click', addTemplate);
 document.getElementById('btn-reset-templates')?.addEventListener('click', resetTemplates);
+document.getElementById('btn-open-tab')?.addEventListener('click', openInTab);
