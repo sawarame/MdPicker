@@ -110,8 +110,8 @@
     }
   },
   "contextMenuCopyPageAsFormat": {
-    "message": "Copy Page as $FORMAT$",
-    "description": "Title for the top-level page copy context menu item.",
+    "message": "Copy Page Link as $FORMAT$",
+    "description": "Title for the top-level page link copy context menu item.",
     "placeholders": {
       "format": {
         "content": "$1",
