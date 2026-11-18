@@ -110,8 +110,8 @@
     }
   },
   "contextMenuCopyPageAsFormat": {
-    "message": "$FORMAT$形式でページをコピー",
-    "description": "トップレベルのページコピー用コンテキストメニューの項目名。",
+    "message": "$FORMAT$形式でページのリンクを作成",
+    "description": "トップレベルのページリンク作成用コンテキストメニューの項目名。",
     "placeholders": {
       "format": {
         "content": "$1",

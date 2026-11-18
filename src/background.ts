@@ -76,7 +76,7 @@ async function setupContextMenus(): Promise<void> {
     // 3. ページ余白用コンテキストメニューの登録
     // ピン留めされた形式をトップレベルに登録
     pinnedTemplates.forEach((t) => {
-      const title = chrome.i18n.getMessage('contextMenuCopyPageAsFormat', [t.name]) || `${t.name}形式でページをコピー`;
+      const title = chrome.i18n.getMessage('contextMenuCopyPageAsFormat', [t.name]) || `${t.name}形式でページのリンクを作成`;
       chrome.contextMenus.create({
         id: `template:page:${t.id}`,
         title: title,
