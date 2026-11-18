@@ -2,12 +2,17 @@
  * オプション画面の制御およびテンプレート管理を行うスクリプト。
  */
 
-import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType, isTemplatePinned } from './template';
+import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType, isTemplatePinned, reorderTemplates } from './template';
 
 /**
  * 現在管理されているテンプレート一覧のインメモリ配列。
  */
 let currentTemplates: FormatTemplate[] = [];
+
+/**
+ * ドラッグ中のテンプレート行のインデックス番号。ドラッグ中でない場合は null。
+ */
+let dragSourceIndex: number | null = null;
 
 /**
  * 保存完了ステータスを表示します。
@@ -75,13 +80,17 @@ const saveShortcutOption = (): void => {
 
 /**
  * テンプレート一覧を保存し、画面を再描画します。
+ * @param onSaved - 再描画後に実行する任意のコールバック関数
  */
-const saveTemplates = (): void => {
+const saveTemplates = (onSaved?: () => void): void => {
   chrome.storage.sync.set(
     { templates: currentTemplates },
     () => {
       renderTemplates();
       showSavedStatus();
+      if (onSaved) {
+        onSaved();
+      }
     }
   );
 };
@@ -107,16 +116,220 @@ const updateShortcutSelect = (selectedId: string): void => {
 };
 
 /**
+ * テーブル行からドラッグ時のドロップ先ハイライト表示をすべて除去します。
+ * @param tbody - テンプレート一覧の tbody 要素
+ */
+const clearDragIndicators = (tbody: HTMLElement): void => {
+  tbody.querySelectorAll('tr').forEach((row) => {
+    row.classList.remove('drag-over-above', 'drag-over-below');
+  });
+};
+
+/**
+ * ドラッグオーバーまたはドロップ時のカーソル位置から移動先の配列インデックスを算出します。
+ * @param fromIndex - 移動元のインデックス番号
+ * @param hoverIndex - カーソルが乗っている行のインデックス番号
+ * @param insertAfter - 行の下半分（後ろ）に挿入する場合は true、上半分（前）の場合は false
+ * @returns 移動先の配列インデックス番号
+ */
+const calculateDropTargetIndex = (fromIndex: number, hoverIndex: number, insertAfter: boolean): number => {
+  if (fromIndex < hoverIndex) {
+    return insertAfter ? hoverIndex : hoverIndex - 1;
+  }
+  return insertAfter ? hoverIndex + 1 : hoverIndex;
+};
+
+/**
+ * 移動後に同じテンプレートの移動ボタンへキーボードフォーカスを戻します。
+ * @param templateId - 移動したテンプレートのID
+ * @param preferredDirection - 優先してフォーカスする移動方向
+ */
+const restoreMoveButtonFocus = (templateId: string, preferredDirection: 'up' | 'down'): void => {
+  const tbody = document.getElementById('template-table-body');
+  if (!tbody) return;
+
+  const targetRow = tbody.querySelector<HTMLTableRowElement>(`tr[data-template-id="${CSS.escape(templateId)}"]`);
+  if (!targetRow) return;
+
+  const preferredBtn = targetRow.querySelector<HTMLButtonElement>(`button[data-move="${preferredDirection}"]`);
+  if (preferredBtn && !preferredBtn.disabled) {
+    preferredBtn.focus();
+    return;
+  }
+
+  // 端まで到達して優先方向が無効になった場合は反対側のボタンへフォーカスを移す
+  const fallbackDirection = preferredDirection === 'up' ? 'down' : 'up';
+  const fallbackBtn = targetRow.querySelector<HTMLButtonElement>(`button[data-move="${fallbackDirection}"]`);
+  if (fallbackBtn && !fallbackBtn.disabled) {
+    fallbackBtn.focus();
+  }
+};
+
+/**
+ * 指定位置のテンプレートを別の位置へ移動し、設定を保存して再描画します。
+ * @param fromIndex - 移動元のインデックス番号
+ * @param toIndex - 移動先のインデックス番号
+ * @param focusDirection - ボタン操作による移動時にフォーカスを復元する方向（任意）
+ */
+const moveTemplate = (fromIndex: number, toIndex: number, focusDirection?: 'up' | 'down'): void => {
+  if (fromIndex === toIndex) return;
+  const targetTemplate = currentTemplates[fromIndex];
+  if (!targetTemplate) return;
+
+  const reordered = reorderTemplates(currentTemplates, fromIndex, toIndex);
+  currentTemplates = reordered;
+
+  saveTemplates(() => {
+    if (focusDirection) {
+      restoreMoveButtonFocus(targetTemplate.id, focusDirection);
+    }
+  });
+};
+
+/**
+ * 並び替え操作セル（ドラッグハンドルおよび上下移動ボタン）を生成します。
+ * @param index - 対象テンプレートのインデックス番号
+ * @returns 生成された td 要素
+ */
+const createOrderCell = (index: number): HTMLTableCellElement => {
+  const tdOrder = document.createElement('td');
+  tdOrder.className = 'col-order';
+
+  const controls = document.createElement('div');
+  controls.className = 'order-controls';
+
+  const dragHandle = document.createElement('span');
+  dragHandle.className = 'drag-handle';
+  dragHandle.textContent = '⋮⋮';
+  const dragLabel = chrome.i18n.getMessage('optionsDragHandle') || 'ドラッグして並び替え';
+  dragHandle.title = dragLabel;
+  dragHandle.setAttribute('aria-label', dragLabel);
+  if (currentTemplates.length <= 1) {
+    dragHandle.style.opacity = '0.35';
+    dragHandle.style.cursor = 'default';
+  }
+  controls.appendChild(dragHandle);
+
+  const upBtn = document.createElement('button');
+  upBtn.type = 'button';
+  upBtn.className = 'btn-move';
+  upBtn.dataset.move = 'up';
+  upBtn.textContent = '↑';
+  const upLabel = chrome.i18n.getMessage('optionsMoveUp') || '上へ移動';
+  upBtn.title = upLabel;
+  upBtn.setAttribute('aria-label', upLabel);
+  upBtn.disabled = index === 0;
+  upBtn.addEventListener('click', () => {
+    moveTemplate(index, index - 1, 'up');
+  });
+  controls.appendChild(upBtn);
+
+  const downBtn = document.createElement('button');
+  downBtn.type = 'button';
+  downBtn.className = 'btn-move';
+  downBtn.dataset.move = 'down';
+  downBtn.textContent = '↓';
+  const downLabel = chrome.i18n.getMessage('optionsMoveDown') || '下へ移動';
+  downBtn.title = downLabel;
+  downBtn.setAttribute('aria-label', downLabel);
+  downBtn.disabled = index === currentTemplates.length - 1;
+  downBtn.addEventListener('click', () => {
+    moveTemplate(index, index + 1, 'down');
+  });
+  controls.appendChild(downBtn);
+
+  tdOrder.appendChild(controls);
+  return tdOrder;
+};
+
+/**
+ * テンプレート行にドラッグ＆ドロップによる並び替えイベントを登録します。
+ * @param tr - 対象の tr 要素
+ * @param tbody - 親の tbody 要素
+ * @param index - 対象テンプレートのインデックス番号
+ */
+const attachRowDragEvents = (tr: HTMLTableRowElement, tbody: HTMLElement, index: number): void => {
+  if (currentTemplates.length <= 1) {
+    tr.draggable = false;
+    return;
+  }
+
+  tr.draggable = true;
+
+  tr.addEventListener('dragstart', (e: DragEvent) => {
+    dragSourceIndex = index;
+    tr.classList.add('dragging');
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(index));
+    }
+  });
+
+  tr.addEventListener('dragover', (e: DragEvent) => {
+    e.preventDefault();
+    if (dragSourceIndex === null || dragSourceIndex === index) {
+      clearDragIndicators(tbody);
+      return;
+    }
+
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    const rect = tr.getBoundingClientRect();
+    const insertAfter = e.clientY >= rect.top + rect.height / 2;
+    const toIndex = calculateDropTargetIndex(dragSourceIndex, index, insertAfter);
+
+    clearDragIndicators(tbody);
+    if (toIndex !== dragSourceIndex) {
+      tr.classList.add(insertAfter ? 'drag-over-below' : 'drag-over-above');
+    }
+  });
+
+  tr.addEventListener('dragleave', () => {
+    tr.classList.remove('drag-over-above', 'drag-over-below');
+  });
+
+  tr.addEventListener('drop', (e: DragEvent) => {
+    e.preventDefault();
+    clearDragIndicators(tbody);
+    if (dragSourceIndex === null || dragSourceIndex === index) {
+      return;
+    }
+
+    const rect = tr.getBoundingClientRect();
+    const insertAfter = e.clientY >= rect.top + rect.height / 2;
+    const toIndex = calculateDropTargetIndex(dragSourceIndex, index, insertAfter);
+    const fromIndex = dragSourceIndex;
+    dragSourceIndex = null;
+
+    moveTemplate(fromIndex, toIndex);
+  });
+
+  tr.addEventListener('dragend', () => {
+    dragSourceIndex = null;
+    tr.classList.remove('dragging');
+    clearDragIndicators(tbody);
+  });
+};
+
+/**
  * テンプレートテーブルとショートカット選択肢を描画します。
  */
 const renderTemplates = (): void => {
   const tbody = document.getElementById('template-table-body');
   if (!tbody) return;
 
+  dragSourceIndex = null;
   tbody.innerHTML = '';
 
   currentTemplates.forEach((template, index) => {
     const tr = document.createElement('tr');
+    tr.dataset.templateId = template.id;
+
+    // 並び替え操作列（ドラッグハンドル・上下移動ボタン）
+    tr.appendChild(createOrderCell(index));
+    attachRowDragEvents(tr, tbody, index);
 
     // ピン留め（トップレベル表示）
     const tdPinned = document.createElement('td');
@@ -292,6 +505,7 @@ const applyLocalization = (): void => {
     { id: 'heading-templates', key: 'optionsTemplatesTitle' },
     { id: 'desc-templates', key: 'optionsTemplatesDesc' },
     { id: 'label-shortcut-template', key: 'optionsShortcutTemplate' },
+    { id: 'th-order', key: 'optionsThOrder' },
     { id: 'th-pinned', key: 'optionsThPinned' },
     { id: 'th-name', key: 'optionsThName' },
     { id: 'th-mimetype', key: 'optionsThMimeType' },
