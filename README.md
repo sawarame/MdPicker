@@ -40,7 +40,7 @@ Since this extension is currently under development, you will need to load it ma
 
 ## 🛠️ Development
 
-This project uses **TypeScript** and **Webpack** for the build process, and adopts **Spec Kit** for specification-driven development.
+This project uses **TypeScript** and **Webpack** for the build process.
 
 ```bash
 # Install dependencies
@@ -53,7 +53,8 @@ npm run build
 npm run dev
 ```
 
-For detailed technical architecture, design principles, and guidelines, please refer to:
-- **Project Constitution**: [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
-- **Functional Specification**: [`docs/spec.md`](./docs/spec.md)
+For detailed technical architecture, design principles, and specifications, please refer to:
+- **Functional Specification**: [`.context/spec.md`](./.context/spec.md)
+- **Tech Stack**: [`.context/tech_stack.md`](./.context/tech_stack.md)
+- **Development Workflow**: [`.context/development.md`](./.context/development.md)
 - **AI Agent & Development Rules**: [`AGENTS.md`](./AGENTS.md)

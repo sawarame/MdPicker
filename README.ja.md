@@ -40,7 +40,7 @@
 
 ## 🛠️ 開発（Development）
 
-本プロジェクトは **TypeScript** と **Webpack** を使用してビルドされています。また、**Spec Kit** による仕様駆動開発を採用しています。
+本プロジェクトは **TypeScript** と **Webpack** を使用してビルドされています。
 
 ```bash
 # 依存するパッケージのインストール
@@ -53,7 +53,8 @@ npm run build
 npm run dev
 ```
 
-設計原則、アーキテクチャ制約、コーディング規約、および詳細な仕様については以下をご参照ください：
-- **プロジェクト憲章 (Constitution)**: [`.specify/memory/constitution.md`](./.specify/memory/constitution.md)
-- **機能仕様書**: [`docs/spec.md`](./docs/spec.md)
+設計原則、技術スタック、開発手順、および詳細な仕様については以下をご参照ください：
+- **機能仕様書**: [`.context/spec.md`](./.context/spec.md)
+- **技術スタック**: [`.context/tech_stack.md`](./.context/tech_stack.md)
+- **開発ワークフロー**: [`.context/development.md`](./.context/development.md)
 - **AIエージェント・開発ルール**: [`AGENTS.md`](./AGENTS.md)

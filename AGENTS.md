@@ -1,45 +1,46 @@
-# Project Rules (MdPicker)
+# Project Instructions (MdPicker)
 
-このドキュメントは、このプロジェクトにおいて AI とコミュニケーションを取る際の基本的なルール・前提条件を定めたものです。
+このファイルは MdPicker プロジェクトの基本的なガイドラインと開発規約を定めたものです。
+開発にあたっては、以下のアーキテクチャ原則および `.context/` フォルダ内にある基礎ドキュメントを必ず参照し、その指示に従ってください。
 
-## 1. 最上位規範: プロジェクト憲章 (Constitution)
-本プロジェクトは **Spec Kit** による仕様駆動開発を採用しています。プロジェクトの設計原則、アーキテクチャ制約、コーディング規約、ガバナンス方針はすべて [プロジェクト憲章 (.specify/memory/constitution.md)](.specify/memory/constitution.md) に定義されており、他のいかなる取り決めにも優先します。
+## 基礎ドキュメント
 
-* **使用言語**: すべてのコミュニケーション、コメント、ドキュメント作成は**日本語（Japanese）**で行ってください。
-* **主要技術スタック**:
-  * Chrome 拡張機能 (Manifest V3)
-  * TypeScript 5.4+ (ターゲット/モジュール: ES2022)
-  * Webpack 5 (モジュールバンドラー)
-  * Node.js / npm (パッケージ・スクリプト管理)
+- **[仕様書](.context/spec.md)**
+  - プロジェクトの基本コンセプト、機能仕様、データ構造、拡張機能権限について記述されています。
+- **[技術スタック](.context/tech_stack.md)**
+  - 使用されている技術・ライブラリ、ディレクトリ構成、npm スクリプト、CI/CD パイプラインについて記述されています。
+- **[開発ワークフロー](.context/development.md)**
+  - 環境構築、ビルド、ブラウザ検証、デバッグ、バージョニングとリリースの手順について記述されています。
 
-## 2. プロジェクトのディレクトリ構成ルール
-このプロジェクトは、ソースコードと拡張機能のパッケージ本体（Chrome に読み込ませるディレクトリ）を明確に分離しています。
+## コーディング・多言語規約
 
-* `src/` : TypeScript のソースコードを格納するディレクトリ（`background.ts`, `content.ts`, `offscreen.ts`, `options.ts`, `template.ts` など）
-* `package/` : **拡張機能本体のルートディレクトリ**。Chrome 拡張機能として読み込まれる実体です。
-  * `package/manifest.json` : 拡張機能の設定ファイル。
-  * `package/offscreen.html` : クリップボードなどの DOM 操作を行うバックグラウンド用 HTML。
-  * `package/options.html` : オプション（設定）画面用 HTML。
-  * `package/js/` : Webpack によってコンパイル・出力された JavaScript ファイルが格納されるディレクトリ（出力時に自動クリーン）。
-  * `package/_locales/` : 多言語リソースファイル。
-  * `package/images/` : 拡張機能のアイコン画像。
-* `docs/` : 機能仕様書などのドキュメントを格納するディレクトリ。
-* `.specify/` : Spec Kit 関連のテンプレート、スクリプト、憲章 (`.specify/memory/constitution.md`) を格納するディレクトリ。
-* `webpack.config.js` : ビルド設定。出力を `./package/js/` フォルダへ行うよう構成されています。
-* `tsconfig.json` : TypeScript 設定（ビルドパスが `package/js` を向くように設定されています）。
+- **[TypeScript コーディングルール](.context/typescript.md)**
+  - コンパイラ設定、型定義、日本語コメント・JSDoc 必須規約、エラーハンドリング、モジュール分割が記述されています。
+- **使用言語の統一**: ユーザーとのやり取り、ドキュメント、設計メモ、コード内のコメント・JSDoc はすべて日本語で記述してください。
+- **多言語対応リソース (`package/_locales/en/messages.json`, `package/_locales/ja/messages.json`)**:
+  - UI ラベルやコンテキストメニューの文言を追加・変更する際は、ハードコードせず必ず英語・日本語双方の `messages.json` を更新してください。
 
-## 3. 実装の取り決めと制約案 (Manifest V3)
-* **DOMアクセスの分離**: Service Worker (`background.ts`) は DOM へのアクセス権を持たないため、クリップボードへの書き込みなどは必ず **Offscreen Document API** (`offscreen.html` + `offscreen.ts`) を用いて行ってください。
-* **Content Script との連携**: ユーザーがフォーカスした HTML 要素のテキストや選択範囲のMarkdown変換結果を取得する場合は必ず **Content Script** (`content.ts`) を経由し、Message Passing（`chrome.runtime.sendMessage` や `chrome.tabs.sendMessage`）等で連携してください。
-* **クリップボードマルチMIME対応**: クリップボード書き込み時は `ClipboardItem` による `text/html` と `text/plain` のマルチMIME同時格納を行い、API非対応環境やフォーカス喪失時のフォールバックを維持してください。
-* **ドキュメントコメント (JSDoc)**: すべてのクラス、関数、メソッドには、概要、`@param`、`@returns` を漏れなく**日本語**で記述した JSDoc を付与してください。
-* **ログ管理**: `console.log` やエラー出力は適切に残しつつも、リリース用ビルドでの過度なログ散発にならないよう注意してください。
-* **権限追加の事前合意**: 拡張機能の権限 (`permissions`, `host_permissions`) を追加する場合は、必ず事前にユーザー (開発者) へ意図と理由を説明し合意を得てください。
+## アーキテクチャと設計原則
 
-## 4. コミットおよびブランチ規約
-* コミットメッセージは **Conventional Commits**（`feat:`, `fix:`, `chore:`, `docs:` 等）に準拠してください。
-* ブランチは `feat/<機能名>` または `fix/<修正名>` を使用してください。
+- **Manifest V3 準拠と疎結合コンポーネント設計**:
+  - Service Worker (`src/background.ts`) はステートレスかつイベント駆動で動作し、DOM API に直接アクセスしないでください。
+  - クリップボード書き込み等の DOM 操作は必ず Offscreen Document API（`package/offscreen.html` + `src/offscreen.ts`）経由で実行してください。
+  - Web ページの DOM 参照、アンカー要素の特定、選択範囲の Markdown 変換は必ず Content Script（`src/content.ts`）が担当し、各コンポーネント間は Chrome Message Passing（`chrome.runtime.sendMessage`, `chrome.tabs.sendMessage`）で疎結合に連携してください。
+  - 設定の保存・同期には `chrome.storage.sync` を使用し、`chrome.storage.onChanged` を購読してコンテキストメニューを動的に即時更新してください。
+- **開発ソースと配布パッケージの分離**:
+  - TypeScript ソースコードおよび元 SVG（`src/icon.svg`）は `src/` 配下にのみ配置し、Chrome に読み込ませる実体（`manifest.json`, HTML, `_locales`, `images`, ビルド済み `js/`）は `package/` 配下で管理してください。
+- **堅牢なクリップボード書き込みとマルチ MIME フォールバック**:
+  - `text/html` 出力時は `ClipboardItem` API により `text/html` とフォールバック用 `text/plain` を同時に書き込み、フォーカス不在や API 非対応環境に備えて `copy` イベントフック（`event.clipboardData.setData`）、`<textarea>` + `document.execCommand('copy')`、`navigator.clipboard.writeText` の多層フォールバックを維持してください。
+- **構造を保全する高精度 Markdown 変換**:
+  - 選択範囲の変換には `turndown` と `turndown-plugin-gfm`（`tables`）を用い、相対 URL（`<img src>` / `<a href>`）はブラウザ解決済み URL で絶対化してください。
+  - リンク要素の抽出では `composedPath()` により Shadow DOM を透過探索し、テキストが空の場合は `img[alt]` → `aria-label` → `title` の順で代替テキストを取得してください。
 
-## 5. 仕様書および仕様駆動開発 (Spec Kit)
-* プロジェクトの機能仕様については [docs/spec.md](docs/spec.md) を参照してください。
-* 新機能の設計や機能改修を行う際は、Spec Kit のワークフロー（`/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement` 等）を活用し、憲章および仕様との整合性を保って進めてください。
+## 実装時の重要ガードレール
+
+- **ソースコードの編集場所とビルド**: ロジック変更は常に `src/` 配下に対して行い、`package/js/` 配下のビルド成果物は直接編集しないでください。`src/` を変更した後は必ず `npm run build` を実行して成果物と `package.zip` を更新してください。
+- **権限追加の事前合意**: `package/manifest.json` の `permissions` や `host_permissions` を追加する場合は、最小特権の原則に基づき、必ず事前にユーザー（開発者）へ意図と影響範囲を説明し合意を得てください。
+- **コミットおよびブランチ規約**:
+  - コミットメッセージは **Conventional Commits**（`feat:`, `fix:`, `chore:`, `docs:`, `refactor:` 等）に準拠してください。
+  - ブランチは `feat/<機能名>` または `fix/<修正名>` を使用してください。
+  - バージョン番号は `package.json`・`package-lock.json`・`package/manifest.json` で完全に同期させてください。
+- **ドキュメントの同期**: 機能や仕様、ディレクトリ構成、権限を変更した場合は、コードと合わせて `.context/spec.md` や `.context/tech_stack.md` などの関連ドキュメントも最新状態に更新してください。
