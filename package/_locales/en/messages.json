@@ -99,6 +99,22 @@
     "message": "Pin to top",
     "description": "Table header for pinning template to top level context menu."
   },
+  "optionsThOrder": {
+    "message": "Order",
+    "description": "Table header for template reordering controls."
+  },
+  "optionsMoveUp": {
+    "message": "Move up",
+    "description": "Tooltip and aria-label for moving a template up."
+  },
+  "optionsMoveDown": {
+    "message": "Move down",
+    "description": "Tooltip and aria-label for moving a template down."
+  },
+  "optionsDragHandle": {
+    "message": "Drag to reorder",
+    "description": "Tooltip and aria-label for template drag handle."
+  },
   "contextMenuCopyLinkAsFormat": {
     "message": "Copy Link as $FORMAT$",
     "description": "Title for the top-level link copy context menu item.",

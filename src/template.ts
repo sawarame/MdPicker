@@ -90,6 +90,35 @@ export function isTemplatePinned(template: FormatTemplate): boolean {
 }
 
 /**
+ * テンプレート配列内の要素を指定した位置へ移動した新しい配列を返します。
+ * インデックスが範囲外、または移動元と移動先が同じ場合は元の順序のコピーを返します。
+ * @param templates - 元のテンプレート配列
+ * @param fromIndex - 移動元のインデックス番号
+ * @param toIndex - 移動先のインデックス番号
+ * @returns 並び替え後の新しいテンプレート配列
+ */
+export function reorderTemplates(
+  templates: FormatTemplate[],
+  fromIndex: number,
+  toIndex: number
+): FormatTemplate[] {
+  if (
+    fromIndex < 0 ||
+    fromIndex >= templates.length ||
+    toIndex < 0 ||
+    toIndex >= templates.length ||
+    fromIndex === toIndex
+  ) {
+    return [...templates];
+  }
+
+  const next = [...templates];
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
+}
+
+/**
  * 数値を2桁のゼロ埋め文字列に変換します。
  * @param num - 変換対象の数値
  * @returns 2桁にゼロ埋めされた文字列

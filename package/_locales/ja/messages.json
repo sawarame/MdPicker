@@ -99,6 +99,22 @@
     "message": "トップレベル",
     "description": "オプション画面：テンプレート一覧のトップレベル表示（ピン留め）列ヘッダー。"
   },
+  "optionsThOrder": {
+    "message": "並び順",
+    "description": "オプション画面：テンプレート一覧の並び替え列ヘッダー。"
+  },
+  "optionsMoveUp": {
+    "message": "上へ移動",
+    "description": "オプション画面：テンプレートを1つ上に移動するボタンのラベル。"
+  },
+  "optionsMoveDown": {
+    "message": "下へ移動",
+    "description": "オプション画面：テンプレートを1つ下に移動するボタンのラベル。"
+  },
+  "optionsDragHandle": {
+    "message": "ドラッグして並び替え",
+    "description": "オプション画面：テンプレート行のドラッグハンドルのラベル。"
+  },
   "contextMenuCopyLinkAsFormat": {
     "message": "$FORMAT$形式でリンクをコピー",
     "description": "トップレベルのリンクコピー用コンテキストメニューの項目名。",
