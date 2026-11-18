@@ -127,8 +127,8 @@
     "message": "Copy page in other formats...",
     "description": "Title for the page sub-menu containing unpinned templates."
   },
-  "optionsOpenInTab": {
-    "message": "Open in new tab",
-    "description": "Tooltip for the button to open options in a new tab from popup."
+  "contextMenuOpenOptions": {
+    "message": "Open Options",
+    "description": "Title for the extension icon right-click menu item to open the options popup."
   }
 }

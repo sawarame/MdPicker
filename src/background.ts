@@ -102,6 +102,13 @@ async function setupContextMenus(): Promise<void> {
         });
       });
     }
+
+    // 4. 拡張機能アイコン右クリック用のポップアップ表示メニュー
+    chrome.contextMenus.create({
+      id: 'open-options-popup',
+      title: chrome.i18n.getMessage('contextMenuOpenOptions') || 'オプションを開く',
+      contexts: ['action']
+    });
   });
 }
 
@@ -171,6 +178,16 @@ async function writeToOffscreenClipboard(text: string, mimeType: string = 'text/
  * コンテキストメニューがクリックされた際の処理をハンドリングします。
  */
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  // 0. 拡張機能アイコン右クリックからのポップアップ表示
+  if (info.menuItemId === 'open-options-popup') {
+    try {
+      await chrome.action.openPopup();
+    } catch (err) {
+      console.warn('Could not open options popup.', err);
+    }
+    return;
+  }
+
   // 1. 標準のMarkdownリンクコピー
   if (info.menuItemId === 'copy-as-markdown' && info.linkUrl) {
     let linkText = info.selectionText || 'Link';
