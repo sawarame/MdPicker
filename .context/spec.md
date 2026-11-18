@@ -88,23 +88,22 @@ Manifest V3 の Service Worker は DOM に直接アクセスできないため�
 2. **`text/plain` 指定時の書き込み**:
    - `<textarea id="content">` を選択して `document.execCommand('copy')` を実行し、要素が存在しない場合は `navigator.clipboard.writeText()` を使用。
 
-### G. オプション画面とポップアップ表示（`package/options.html` / `src/options.ts`）
-ツールバーアイコンクリック時のポップアップ表示と、拡張機能管理ページ／右クリックメニューからの設定画面表示の双方を単一の `options.html` で提供します。
+### G. オプション画面（ポップアップ表示：`package/options.html` / `src/options.ts`）
+ツールバーアイコンからのポップアップ表示として単一の `options.html` で設定画面を提供します（`chrome://extensions/` 上の埋め込み `options_ui` 画面は廃止）。
 
 - **アクセス経路**:
   - ツールバーアイコンの左クリック（`manifest.json` の `action.default_popup: "options.html"`）。
-  - 拡張機能アイコン右クリックメニュー「オプション」または `chrome://extensions/` の詳細画面（`options_ui.page: "options.html"`, `open_in_tab: false`）。
-  - ポップアップヘッダー右上の「新しいタブで開く」ボタン（`#btn-open-tab`）クリック時に `chrome.runtime.openOptionsPage()` を呼び出し、独立タブとして展開可能。
+  - ツールバーアイコンの右クリックメニュー「オプションを開く」（`contexts: ["action"]`、メニューID: `open-options-popup`、英語: `"Open Options"`）選択時に `chrome.action.openPopup()` を呼び出してポップアップを表示（Chrome 127 以降）。
 - **レスポンシブレイアウト**:
   - ポップアップ表示時: `min-width: 480px; max-width: 540px;`、横スクロールなしで全設定項目にアクセス可能。
-  - ワイド画面／独立タブ表示時: `@media (min-width: 700px)` により `max-width: 840px;` へ自動拡張。
+  - ワイド画面表示時: `@media (min-width: 700px)` により `max-width: 840px;` へ自動拡張。
 - **設定・管理機能**:
   - ファビコン設定（「ページリンクにfaviconを含める」チェックボックス、サイズ選択ドロップダウン。未有効時はサイズ選択を半透明・`disabled` 化）。
   - デフォルトの形式（ショートカット等で使用するテンプレート）の選択。
   - テンプレート一覧テーブル（ピン留めチェックボックス・名前・MIMEタイプ・形式・削除ボタン）。ピン留め切り替えは即時保存され、`chrome.storage.onChanged` を通じてコンテキストメニューに即座に反映。
   - 新規テンプレート追加フォーム（表示名・MIMEタイプ `text/plain` / `text/html`・書式文字列。トリム後の空文字入力時はエラー表示。新規追加時の `id` は `custom-${Date.now()}`、`pinned` はデフォルト `false`）。
   - テンプレート削除バリデーション（残り 1 件のテンプレートは削除不可。ショートカット用テンプレートが削除された場合は残存先頭テンプレートを自動的に再割り当て）。
-  - 「初期テンプレートに戻す」機能（埋め込み `options_ui` でも動作するよう `window.confirm()` に依存せず、ボタン文言を赤色に変化させて 4 秒以内に再クリックする 2 段階インライン確認を採用。実行時は `DEFAULT_TEMPLATES` と `shortcutTemplateId: 'markdown'` を復元）。
+  - 「初期テンプレートに戻す」機能（ポップアップ表示でも確実に動作するよう `window.confirm()` に依存せず、ボタン文言を赤色に変化させて 4 秒以内に再クリックする 2 段階インライン確認を採用。実行時は `DEFAULT_TEMPLATES` と `shortcutTemplateId: 'markdown'` を復元）。
 - **多言語対応 (`chrome.i18n`)**:
   - `package/_locales/en/messages.json`（主言語 `default_locale: "en"`）と `package/_locales/ja/messages.json` により UI ラベル・コンテキストメニュー文言・メッセージを切り替え。
 
