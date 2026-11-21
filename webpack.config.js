@@ -5,7 +5,8 @@ module.exports = {
     background: './src/background.ts',
     content: './src/content.ts',
     offscreen: './src/offscreen.ts',
-    options: './src/options.ts'
+    options: './src/options.ts',
+    popup: './src/popup.ts'
   },
   output: {
     path: path.resolve(__dirname, 'package', 'js'),

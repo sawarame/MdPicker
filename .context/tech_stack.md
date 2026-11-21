@@ -24,14 +24,16 @@ MdPicker プロジェクトで使用されている主要な技術、ツール�
   - `background.ts`: Service Worker として動作するバックグラウンドスクリプト（コンテキストメニュー管理、`smart-copy` ショートカット処理、Offscreen Document 起動）。
   - `content.ts`: 全ページに注入される Content Script（Shadow DOM 対応リンクテキスト抽出、選択範囲の相対 URL 絶対化および Turndown 変換）。
   - `offscreen.ts`: Offscreen Document 用スクリプト（`ClipboardItem` マルチ MIME 書き込みおよび `copy` イベント / `execCommand` フォールバック）。
-  - `options.ts`: オプション画面（ツールバーポップアップ表示）の UI 制御、バリデーション、ストレージ保存、多言語適用。
-  - `template.ts`: `FormatTemplate` / `TemplateContext` 型定義、標準プリセット（`DEFAULT_TEMPLATES`）、ピン留め判定（`isTemplatePinned`）、プレースホルダー置換（`renderTemplate`）。
+  - `options.ts`: オプション画面（タブ表示）の UI 制御、バリデーション、ストレージ保存、多言語適用。
+  - `popup.ts`: ツールバーポップアップ画面のコピーメニュー構築、アクティブタブ選択確認、バックグラウンドへのコピー要求およびフィードバック制御。
+  - `template.ts`: `FormatTemplate` / `TemplateContext` 型定義、標準プリセット（`DEFAULT_TEMPLATES`）、ピン留め判定・振り分け（`isTemplatePinned`, `partitionTemplatesByPinned`）、プレースホルダー置換・ページ整形（`renderTemplate`, `formatPageWithTemplate`）。
   - `icon.svg`: アプリアイコンの元 SVG ファイル。
 - `package/`: 拡張機能として Chrome に読み込ませる（配布する）ルートディレクトリ。
-  - `manifest.json`: 拡張機能のマニフェスト定義（権限、コマンド、`action.default_popup`、アイコン等）。
-  - `options.html`: オプション画面およびツールバーポップアップ画面用の HTML / CSS。
+  - `manifest.json`: 拡張機能のマニフェスト定義（権限、コマンド、`action.default_popup`、`options_ui`、アイコン等）。
+  - `popup.html`: ツールバーアイコンクリック時のコピーメニューポップアップ画面用 HTML / CSS。
+  - `options.html`: オプション画面（タブ表示）用の HTML / CSS。
   - `offscreen.html`: クリップボード操作用の不可視 Offscreen Document HTML。
-  - `js/`: Webpack によってビルドされた JavaScript ファイル群（`background.js`, `content.js`, `offscreen.js`, `options.js`）が出力される（`.gitignore` 対象）。
+  - `js/`: Webpack によってビルドされた JavaScript ファイル群（`background.js`, `content.js`, `offscreen.js`, `options.js`, `popup.js`）が出力される（`.gitignore` 対象）。
   - `images/`: `scripts/generate-icons.js` によって生成されたアイコン画像（`icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`）。
   - `_locales/`: `en` と `ja` の国際化（i18n）用メッセージファイル（`messages.json`）。
 - `scripts/`: ビルド補助スクリプトディレクトリ。

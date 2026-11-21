@@ -88,22 +88,35 @@ Manifest V3 の Service Worker は DOM に直接アクセスできないため�
 2. **`text/plain` 指定時の書き込み**:
    - `<textarea id="content">` を選択して `document.execCommand('copy')` を実行し、要素が存在しない場合は `navigator.clipboard.writeText()` を使用。
 
-### G. オプション画面（ポップアップ表示：`package/options.html` / `src/options.ts`）
-ツールバーアイコンからのポップアップ表示として単一の `options.html` で設定画面を提供します（`chrome://extensions/` 上の埋め込み `options_ui` 画面は廃止）。
+### G. ツールバーアイコン ポップアップメニュー（`package/popup.html` / `src/popup.ts`）
+ツールバーアイコンの左クリック（`manifest.json` の `action.default_popup: "popup.html"`）で開くポップアップ画面から、右クリックメニュー相当のページ／選択範囲コピー操作を提供します。
+
+- **メニュー構成・並び順**:
+  - **ページリンクのコピー（ピン留めテンプレート）**: `pinned: true` のテンプレートを登録順でトップレベルに表示します（ラベル形式: `contextMenuCopyPageAsFormat`）。
+  - **その他の形式でコピー（未ピン留めテンプレート）**: 未ピン留めテンプレートが 1 件以上存在する場合、「その他の形式でコピー」（`contextMenuOtherFormatsPage`）折りたたみセクション配下に登録順で表示します（0 件時は非表示）。
+  - **選択範囲をMarkdownとしてコピー**: 常に表示し、ポップアップ起動時にアクティブタブへ `GET_SMART_MARKDOWN` を問い合わせて選択テキストがある場合のみ有効化します（未選択や `chrome://` 等の特殊ページでは `disabled`）。
+  - **オプション画面への導線**: ヘッダーの「オプションを開く」ボタンクリックで `chrome.runtime.openOptionsPage()` を実行し、オプション画面を新規タブで開いてポップアップを閉じます。
+- **コピー実行とフィードバック**:
+  - 項目クリック時は `chrome.runtime.sendMessage`（`POPUP_COPY_PAGE` / `POPUP_COPY_SELECTION`）経由で `src/background.ts` の共通コピー処理（`includeFavicon`, `faviconSize`, `renderTemplate`, Offscreen Document API 書き込み）を実行します。
+  - コピー成功時は視認性の高い完了フィードバックバナー（「コピーしました」等）を一定時間（3 秒）表示した後にポップアップを自動で閉じ、失敗時はエラーバナーを表示します。
+  - アクティブタブの URL が取得できない場合はページコピー項目を `disabled` とします。
+
+### H. オプション画面（タブ表示：`package/options.html` / `src/options.ts`）
+`manifest.json` の `options_ui`（`page: "options.html"`, `open_in_tab: true`）により、独立したブラウザタブとして設定画面を提供します。
 
 - **アクセス経路**:
-  - ツールバーアイコンの左クリック（`manifest.json` の `action.default_popup: "options.html"`）。
-  - ツールバーアイコンの右クリックメニュー「オプションを開く」（`contexts: ["action"]`、メニューID: `open-options-popup`、英語: `"Open Options"`）選択時に `chrome.action.openPopup()` を呼び出してポップアップを表示（Chrome 127 以降）。
+  - ポップアップ画面ヘッダーの「オプションを開く」ボタン。
+  - ツールバーアイコンの右クリックメニュー「オプションを開く」（`contexts: ["action"]`、メニューID: `open-options`、英語: `"Open Options"`）選択時に `chrome.runtime.openOptionsPage()` を呼び出してタブで表示。
+  - ブラウザの拡張機能管理画面（`chrome://extensions/`）からの「拡張機能のオプション」。
 - **レスポンシブレイアウト**:
-  - ポップアップ表示時: `width: 600px; min-width: 600px;`、横スクロールなしで全設定項目にアクセス可能。
-  - ワイド画面表示時: `@media (min-width: 700px)` により `width: auto; max-width: 840px;` へ自動拡張。
+  - タブ表示に最適化した中央寄せレイアウト（`width: 100%; max-width: 840px;`、余白調整）により、横スクロールなしで全設定項目にアクセス可能。
 - **設定・管理機能**:
   - ファビコン設定（「ページリンクにfaviconを含める」チェックボックス、サイズ選択ドロップダウン。未有効時はサイズ選択を半透明・`disabled` 化）。
   - デフォルトの形式（ショートカット等で使用するテンプレート）の選択。
-  - テンプレート一覧テーブル（並び替え操作列・ピン留めチェックボックス・名前・MIMEタイプ・形式・削除ボタン）。ドラッグ＆ドロップまたは上下移動ボタン（`↑` / `↓`）による並び替えやピン留め切り替えは即時保存され、`chrome.storage.onChanged` を通じてコンテキストメニュー（第1階層およびサブメニュー内）の順序・構成に即座に反映。
+  - テンプレート一覧テーブル（並び替え操作列・ピン留めチェックボックス・名前・MIMEタイプ・形式・削除ボタン）。ドラッグ＆ドロップまたは上下移動ボタン（`↑` / `↓`）による並び替えやピン留め切り替えは即時保存され、`chrome.storage.onChanged` を通じてコンテキストメニュー（第1階層およびサブメニュー内）および次回ポップアップ表示の構成に即座に反映。
   - 新規テンプレート追加フォーム（表示名・MIMEタイプ `text/plain` / `text/html`・書式文字列。トリム後の空文字入力時はエラー表示。新規追加時の `id` は `custom-${Date.now()}`、`pinned` はデフォルト `false`）。
   - テンプレート削除バリデーション（残り 1 件のテンプレートは削除不可。ショートカット用テンプレートが削除された場合は残存先頭テンプレートを自動的に再割り当て）。
-  - 「初期テンプレートに戻す」機能（ポップアップ表示でも確実に動作するよう `window.confirm()` に依存せず、ボタン文言を赤色に変化させて 4 秒以内に再クリックする 2 段階インライン確認を採用。実行時は `DEFAULT_TEMPLATES` と `shortcutTemplateId: 'markdown'` を復元）。
+  - 「初期テンプレートに戻す」機能（ボタン文言を赤色に変化させて 4 秒以内に再クリックする 2 段階インライン確認を採用。実行時は `DEFAULT_TEMPLATES` と `shortcutTemplateId: 'markdown'` を復元）。
 - **多言語対応 (`chrome.i18n`)**:
   - `package/_locales/en/messages.json`（主言語 `default_locale: "en"`）と `package/_locales/ja/messages.json` により UI ラベル・コンテキストメニュー文言・メッセージを切り替え。
 

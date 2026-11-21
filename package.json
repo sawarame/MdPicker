@@ -5,6 +5,7 @@
   "scripts": {
     "build": "rimraf ./package/js && rimraf package.zip && webpack --mode production && (cd package && zip -r ../package.zip .)",
     "dev": "webpack --mode development --watch",
+    "test": "node --test tests/*.test.mts",
     "generate-icons": "node scripts/generate-icons.js"
   },
   "devDependencies": {

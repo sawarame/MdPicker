@@ -2,7 +2,13 @@
  * バックグラウンド処理およびコンテキストメニュー、ショートカットキーのハンドリングを行うスクリプト。
  */
 
-import { FormatTemplate, DEFAULT_TEMPLATES, renderTemplate, isTemplatePinned } from './template';
+import {
+  FormatTemplate,
+  DEFAULT_TEMPLATES,
+  renderTemplate,
+  partitionTemplatesByPinned,
+  formatPageWithTemplate
+} from './template';
 
 /**
  * 現在のタブまたはドメインからファビコンのURLを取得します。
@@ -33,8 +39,7 @@ async function setupContextMenus(): Promise<void> {
     });
 
     const templateList: FormatTemplate[] = templates && templates.length > 0 ? templates : DEFAULT_TEMPLATES;
-    const pinnedTemplates = templateList.filter(isTemplatePinned);
-    const unpinnedTemplates = templateList.filter((t) => !isTemplatePinned(t));
+    const { pinned: pinnedTemplates, unpinned: unpinnedTemplates } = partitionTemplatesByPinned(templateList);
 
     // 1. リンク用コンテキストメニューの登録
     // ピン留めされた形式をトップレベルに登録
@@ -103,9 +108,9 @@ async function setupContextMenus(): Promise<void> {
       });
     }
 
-    // 4. 拡張機能アイコン右クリック用のポップアップ表示メニュー
+    // 4. 拡張機能アイコン右クリック用のオプション画面（タブ表示）メニュー
     chrome.contextMenus.create({
-      id: 'open-options-popup',
+      id: 'open-options',
       title: chrome.i18n.getMessage('contextMenuOpenOptions') || 'オプションを開く',
       contexts: ['action']
     });
@@ -156,34 +161,80 @@ async function setupOffscreenDocument(path: string): Promise<void> {
  * @param text - クリップボードに書き込む文字列（HTMLまたはプレーンテキスト）
  * @param mimeType - 書き込み時のMIMEタイプ（'text/plain' または 'text/html'）
  * @param plainText - リッチテキスト時のフォールバック用プレーンテキスト
- * @returns 処理完了のPromise
+ * @returns 書き込みに成功した場合は true、失敗した場合は false
  */
-async function writeToOffscreenClipboard(text: string, mimeType: string = 'text/plain', plainText?: string): Promise<void> {
+async function writeToOffscreenClipboard(
+  text: string,
+  mimeType: string = 'text/plain',
+  plainText?: string
+): Promise<boolean> {
   try {
     await setupOffscreenDocument('offscreen.html');
-    await chrome.runtime.sendMessage({
+    const response = await chrome.runtime.sendMessage({
       type: 'copy-text-to-clipboard',
       target: 'offscreen',
       data: text,
       mimeType: mimeType,
       plainText: plainText
     });
-    console.log('Text copied to clipboard successfully');
+    if (response && response.success === false) {
+      console.error('Offscreen clipboard write returned failure:', response.error);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.error('Failed to copy to clipboard:', err);
+    return false;
   }
+}
+
+/**
+ * 指定したタブのページ情報をテンプレートに従ってフォーマットし、クリップボードへコピーします。
+ * @param tab - コピー対象のタブ情報
+ * @param templateId - 適用するテンプレートのID
+ * @returns コピーに成功した場合は true、失敗または対象外の場合は false
+ */
+async function copyPageTabWithTemplate(
+  tab: chrome.tabs.Tab | undefined,
+  templateId: string
+): Promise<boolean> {
+  if (!tab || !tab.url) {
+    return false;
+  }
+
+  const { templates, faviconSize, includeFavicon } = await chrome.storage.sync.get({
+    templates: DEFAULT_TEMPLATES,
+    faviconSize: '16',
+    includeFavicon: false
+  });
+
+  const templateList: FormatTemplate[] = templates && templates.length > 0 ? templates : DEFAULT_TEMPLATES;
+  const targetTemplate = templateList.find((t) => t.id === templateId) || templateList[0];
+  const mimeType = targetTemplate.mimeType || 'text/plain';
+  const pageTitle = tab.title || tab.url;
+  const faviconUrl = getFaviconUrl(tab.url, faviconSize, tab.favIconUrl);
+
+  const formatted = formatPageWithTemplate(targetTemplate, {
+    title: pageTitle,
+    url: tab.url,
+    faviconUrl: faviconUrl,
+    includeFavicon: Boolean(includeFavicon)
+  });
+
+  // リッチテキスト非対応エディタ用（text/plain）にもフォーマット済み文字列を渡す
+  return writeToOffscreenClipboard(formatted, mimeType, formatted);
 }
 
 /**
  * コンテキストメニューがクリックされた際の処理をハンドリングします。
  */
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  // 0. 拡張機能アイコン右クリックからのポップアップ表示
-  if (info.menuItemId === 'open-options-popup') {
+  // 0. 拡張機能アイコン右クリックからのオプション画面表示（タブで開く）
+  if (info.menuItemId === 'open-options' || info.menuItemId === 'open-options-popup') {
     try {
-      await chrome.action.openPopup();
+      await chrome.runtime.openOptionsPage();
     } catch (err) {
-      console.warn('Could not open options popup.', err);
+      console.warn('Could not open options page.', err);
     }
     return;
   }
@@ -290,21 +341,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       });
       // リッチテキスト非対応エディタ用（text/plain）にもオプションで指定された形式（formatted）を渡す
       await writeToOffscreenClipboard(formatted, mimeType, formatted);
-    } else if (tab && tab.url && tab.title) {
-      const { includeFavicon } = await chrome.storage.sync.get({ includeFavicon: false });
-      const faviconUrl = getFaviconUrl(tab.url, faviconSize, tab.favIconUrl);
-      let formatted: string;
-      if (targetTemplate.id === 'markdown' && includeFavicon) {
-        formatted = faviconUrl ? `![favicon](${faviconUrl}) [${tab.title}](${tab.url})` : `[${tab.title}](${tab.url})`;
-      } else {
-        formatted = renderTemplate(targetTemplate.format, {
-          title: tab.title,
-          url: tab.url,
-          faviconUrl: faviconUrl
-        });
-      }
-      // リッチテキスト非対応エディタ用（text/plain）にもオプションで指定された形式（formatted）を渡す
-      await writeToOffscreenClipboard(formatted, mimeType, formatted);
+    } else if (!isLinkAction) {
+      await copyPageTabWithTemplate(tab, targetTemplate.id);
     }
   }
 });
@@ -358,20 +396,12 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
         const faviconUrl = getFaviconUrl(targetTab.url, faviconSize, targetTab.favIconUrl);
         resultMimeType = targetTemplate.mimeType || 'text/plain';
 
-        // 標準Markdownでかつfavicon付与がONの場合は、favicon画像付きMarkdown形式を適用
-        if (targetTemplate.id === 'markdown' && includeFavicon) {
-          if (faviconUrl) {
-            resultText = `![favicon](${faviconUrl}) [${targetTab.title}](${targetTab.url})`;
-          } else {
-            resultText = `[${targetTab.title}](${targetTab.url})`;
-          }
-        } else {
-          resultText = renderTemplate(targetTemplate.format, {
-            title: targetTab.title,
-            url: targetTab.url,
-            faviconUrl: faviconUrl
-          });
-        }
+        resultText = formatPageWithTemplate(targetTemplate, {
+          title: targetTab.title,
+          url: targetTab.url,
+          faviconUrl: faviconUrl,
+          includeFavicon: Boolean(includeFavicon)
+        });
       } else if (targetTab.url) {
         resultText = targetTab.url;
         resultMimeType = 'text/plain';
@@ -383,4 +413,58 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
       await writeToOffscreenClipboard(resultText, resultMimeType, resultText);
     }
   }
+});
+
+/**
+ * ポップアップからのコピー要求メッセージを受信してクリップボード処理を実行します。
+ * @param message - ポップアップから送信されたメッセージオブジェクト
+ * @param _sender - メッセージ送信元情報
+ * @param sendResponse - コピー成否を返すコールバック関数
+ * @returns 非同期応答を行う場合は true、それ以外は false
+ */
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (!message || message.target === 'offscreen') {
+    return false;
+  }
+
+  if (message.type === 'POPUP_COPY_PAGE') {
+    (async () => {
+      let targetTab: chrome.tabs.Tab | undefined;
+      if (typeof message.tabId === 'number') {
+        try {
+          targetTab = await chrome.tabs.get(message.tabId);
+        } catch (err) {
+          console.warn('指定されたタブ情報の取得に失敗しました:', err);
+        }
+      }
+      if (!targetTab) {
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        targetTab = tabs[0];
+      }
+      const success = await copyPageTabWithTemplate(targetTab, String(message.templateId || ''));
+      sendResponse({ success });
+    })().catch((err) => {
+      console.error('POPUP_COPY_PAGE 処理中にエラーが発生しました:', err);
+      sendResponse({ success: false });
+    });
+    return true;
+  }
+
+  if (message.type === 'POPUP_COPY_SELECTION') {
+    (async () => {
+      const markdown = typeof message.markdown === 'string' ? message.markdown : '';
+      if (!markdown) {
+        sendResponse({ success: false });
+        return;
+      }
+      const success = await writeToOffscreenClipboard(markdown, 'text/plain', markdown);
+      sendResponse({ success });
+    })().catch((err) => {
+      console.error('POPUP_COPY_SELECTION 処理中にエラーが発生しました:', err);
+      sendResponse({ success: false });
+    });
+    return true;
+  }
+
+  return false;
 });
