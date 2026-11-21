@@ -53,15 +53,8 @@
       display: flex;
       flex-direction: column;
     }
-    .menu-section-heading {
-      padding: 6px 12px 3px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #57606a;
-      border-top: 1px solid #eaeef2;
-      margin-top: 4px;
-    }
-    .menu-item-btn {
+    .menu-item-btn,
+    .menu-toggle-btn {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -78,11 +71,13 @@
       box-sizing: border-box;
       word-break: break-word;
     }
-    .menu-item-btn:hover:not(:disabled) {
+    .menu-item-btn:hover:not(:disabled),
+    .menu-toggle-btn:hover:not(:disabled) {
       background-color: #f0f6ff;
       color: #0969da;
     }
     .menu-item-btn:focus-visible,
+    .menu-toggle-btn:focus-visible,
     .btn-options-link:focus-visible {
       outline: 2px solid #0969da;
       outline-offset: -2px;
@@ -92,12 +87,28 @@
       cursor: not-allowed;
       opacity: 0.65;
     }
+    .toggle-arrow {
+      font-size: 10px;
+      color: #57606a;
+      margin-left: 8px;
+      transition: transform 0.15s ease;
+      flex-shrink: 0;
+    }
+    .menu-toggle-btn[aria-expanded="true"] .toggle-arrow {
+      transform: rotate(90deg);
+    }
     .submenu-list {
       display: flex;
       flex-direction: column;
+      background-color: #f8fafc;
+      border-top: 1px solid #f0f2f5;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    .submenu-list[hidden] {
+      display: none;
     }
     .menu-sub-item-btn {
-      padding-left: 20px;
+      padding-left: 24px;
       font-size: 12.5px;
     }
     .menu-divider {
@@ -150,8 +161,17 @@
     <div id="pinned-menu-list" class="menu-section"></div>
 
     <div id="other-formats-section" class="menu-section" hidden>
-      <div id="other-formats-heading" class="menu-section-heading">Copy page in other formats...</div>
-      <div id="other-formats-list" class="submenu-list"></div>
+      <button
+        type="button"
+        id="btn-toggle-other"
+        class="menu-toggle-btn"
+        aria-expanded="false"
+        aria-controls="other-formats-list"
+      >
+        <span class="toggle-label">Copy page in other formats...</span>
+        <span class="toggle-arrow" aria-hidden="true">&#9654;</span>
+      </button>
+      <div id="other-formats-list" class="submenu-list" hidden></div>
     </div>
 
     <hr class="menu-divider">

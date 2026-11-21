@@ -152,9 +152,9 @@ test('HTMLファイルとビルド成果物: popup.html/options.htmlおよびバ
   const optionsHtml = fs.readFileSync(path.join(rootDir, 'package', 'options.html'), 'utf8');
 
   assert.match(popupHtml, /src="js\/popup\.js"/);
-  assert.match(popupHtml, /id="other-formats-heading"/);
-  assert.match(popupHtml, /<div id="other-formats-list" class="submenu-list"><\/div>/);
-  assert.doesNotMatch(popupHtml, /btn-toggle-other/);
+  assert.match(popupHtml, /id="btn-toggle-other"/);
+  assert.match(popupHtml, /<div id="other-formats-list" class="submenu-list" hidden><\/div>/);
+  assert.doesNotMatch(popupHtml, /other-formats-heading/);
   assert.match(optionsHtml, /src="js\/options\.js"/);
   assert.ok(fs.existsSync(path.join(rootDir, 'package', 'js', 'popup.js')));
   assert.ok(fs.existsSync(path.join(rootDir, 'package', 'js', 'options.js')));
