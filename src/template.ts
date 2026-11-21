@@ -90,6 +90,63 @@ export function isTemplatePinned(template: FormatTemplate): boolean {
 }
 
 /**
+ * テンプレート一覧を「ピン留め（トップレベル表示）」と「未ピン留め（その他メニュー）」に振り分けます。
+ * それぞれの配列は元のテンプレート一覧の並び順を維持します。
+ * @param templates - 振り分け対象のフォーマットテンプレート配列
+ * @returns ピン留め配列と未ピン留め配列を含むオブジェクト
+ */
+export function partitionTemplatesByPinned(templates: FormatTemplate[]): {
+  pinned: FormatTemplate[];
+  unpinned: FormatTemplate[];
+} {
+  const pinned: FormatTemplate[] = [];
+  const unpinned: FormatTemplate[] = [];
+
+  templates.forEach((template) => {
+    if (isTemplatePinned(template)) {
+      pinned.push(template);
+    } else {
+      unpinned.push(template);
+    }
+  });
+
+  return { pinned, unpinned };
+}
+
+/**
+ * ページコピー時のコンテキスト情報。
+ */
+export interface PageFormatContext extends TemplateContext {
+  /** Markdownテンプレート時にファビコンを含めるかどうか */
+  includeFavicon: boolean;
+}
+
+/**
+ * ページ情報と指定テンプレートを用いて、クリップボードへ書き込む文字列を生成します。
+ * 標準 Markdown テンプレートかつファビコン付与が有効な場合は、ファビコン画像付き Markdown 形式を返します。
+ * @param template - 適用するフォーマットテンプレート
+ * @param context - ページタイトル・URL・ファビコン情報を含むコンテキスト
+ * @returns フォーマット済みの文字列
+ */
+export function formatPageWithTemplate(
+  template: FormatTemplate,
+  context: PageFormatContext
+): string {
+  if (template.id === 'markdown' && context.includeFavicon) {
+    if (context.faviconUrl) {
+      return `![favicon](${context.faviconUrl}) [${context.title}](${context.url})`;
+    }
+    return `[${context.title}](${context.url})`;
+  }
+
+  return renderTemplate(template.format, {
+    title: context.title,
+    url: context.url,
+    faviconUrl: context.faviconUrl
+  });
+}
+
+/**
  * テンプレート配列内の要素を指定した位置へ移動した新しい配列を返します。
  * インデックスが範囲外、または移動元と移動先が同じ場合は元の順序のコピーを返します。
  * @param templates - 元のテンプレート配列

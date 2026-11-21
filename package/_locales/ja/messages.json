@@ -145,6 +145,22 @@
   },
   "contextMenuOpenOptions": {
     "message": "オプションを開く",
-    "description": "拡張機能アイコンの右クリックメニューからオプションポップアップを開く項目名。"
+    "description": "拡張機能アイコンの右クリックメニューやポップアップからオプション画面（タブ）を開く項目名。"
+  },
+  "popupCopied": {
+    "message": "コピーしました",
+    "description": "ポップアップでクリップボードへのコピーが完了した際のフィードバックメッセージ。"
+  },
+  "popupCopyFailed": {
+    "message": "コピーに失敗しました",
+    "description": "ポップアップでクリップボードへのコピーに失敗した際のエラーメッセージ。"
+  },
+  "popupNoSelection": {
+    "message": "ページ上でテキストが選択されていません",
+    "description": "ポップアップで選択範囲コピーが無効な理由を示すツールチップ文言。"
+  },
+  "popupPageUnavailable": {
+    "message": "このページの情報を取得できません",
+    "description": "アクティブタブのURL等を取得できない場合のエラー・ツールチップ文言。"
   }
 }

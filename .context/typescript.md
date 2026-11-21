@@ -27,4 +27,5 @@
 - `src/background.ts`: Service Worker としてのイベント駆動処理（コンテキストメニュー構築、ショートカット制御、メッセージ中継、Offscreen Document 起動）。DOM 操作は行わない。
 - `src/content.ts`: Web ページ DOM からのリンクテキスト抽出および選択範囲 Markdown 変換（Turndown + 相対 URL 絶対化）。
 - `src/offscreen.ts`: Offscreen Document 内でのマルチ MIME クリップボード書き込みおよびフォールバック処理。
+- `src/popup.ts`: ツールバーポップアップ画面のコピーメニュー構築、アクティブタブ選択確認、バックグラウンドへのコピー要求およびフィードバック制御。
 - `src/options.ts`: 設定画面の DOM イベント制御、入力バリデーション、i18n 適用、`chrome.storage.sync` への保存・復元。

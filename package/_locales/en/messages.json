@@ -145,6 +145,22 @@
   },
   "contextMenuOpenOptions": {
     "message": "Open Options",
-    "description": "Title for the extension icon right-click menu item to open the options popup."
+    "description": "Title for opening the options tab from the extension icon context menu or popup."
+  },
+  "popupCopied": {
+    "message": "Copied!",
+    "description": "Feedback message shown in the popup when text is copied to the clipboard."
+  },
+  "popupCopyFailed": {
+    "message": "Failed to copy",
+    "description": "Error message shown in the popup when copying to the clipboard fails."
+  },
+  "popupNoSelection": {
+    "message": "No text selected on this page",
+    "description": "Tooltip shown when the selection copy button is disabled in the popup."
+  },
+  "popupPageUnavailable": {
+    "message": "Cannot access this page's info",
+    "description": "Tooltip and status message shown when active tab info is unavailable."
   }
 }

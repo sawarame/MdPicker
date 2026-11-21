@@ -1,16 +1,36 @@
 /**
  * バックグラウンド等からのメッセージを受信してオフスクリーンの処理を実行するリスナー関数。
+ * 非同期のクリップボード書き込み完了後に sendResponse で成否を返却します。
  * @param message - 受信したメッセージオブジェクト
- * @returns 処理完了のPromise
+ * @param _sender - メッセージ送信元情報
+ * @param sendResponse - 応答用コールバック関数
+ * @returns 非同期応答を行う場合は true、対象外メッセージの場合は false
  */
-async function handleMessages(message: any): Promise<void> {
-  if (message.target !== 'offscreen') {
-    return;
+function handleMessages(
+  message: any,
+  _sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: { success: boolean; error?: string }) => void
+): boolean {
+  if (!message || message.target !== 'offscreen') {
+    return false;
   }
 
   if (message.type === 'copy-text-to-clipboard') {
-    await handleClipboardWrite(message.data, message.mimeType, message.plainText);
+    handleClipboardWrite(message.data, message.mimeType, message.plainText)
+      .then(() => {
+        sendResponse({ success: true });
+      })
+      .catch((err) => {
+        console.error('オフスクリーンでのクリップボード書き込みに失敗しました:', err);
+        sendResponse({
+          success: false,
+          error: err instanceof Error ? err.message : String(err)
+        });
+      });
+    return true;
   }
+
+  return false;
 }
 
 chrome.runtime.onMessage.addListener(handleMessages);
