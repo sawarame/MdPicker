@@ -93,12 +93,12 @@ Manifest V3 の Service Worker は DOM に直接アクセスできないため�
 
 - **メニュー構成・並び順**:
   - **ページリンクのコピー（ピン留めテンプレート）**: `pinned: true` のテンプレートを登録順でトップレベルに表示します（ラベル形式: `contextMenuCopyPageAsFormat`）。
-  - **その他の形式でコピー（未ピン留めテンプレート）**: 未ピン留めテンプレートが 1 件以上存在する場合、「その他の形式でコピー」（`contextMenuOtherFormatsPage`）折りたたみセクション配下に登録順で表示します（0 件時は非表示）。
+  - **その他の形式でコピー（未ピン留めテンプレート）**: 未ピン留めテンプレートが 1 件以上存在する場合、「その他の形式でコピー」（`contextMenuOtherFormatsPage`）見出し配下に登録順で常時展開表示します（0 件時は非表示）。
   - **選択範囲をMarkdownとしてコピー**: 常に表示し、ポップアップ起動時にアクティブタブへ `GET_SMART_MARKDOWN` を問い合わせて選択テキストがある場合のみ有効化します（未選択や `chrome://` 等の特殊ページでは `disabled`）。
   - **オプション画面への導線**: ヘッダーの「オプションを開く」ボタンクリックで `chrome.runtime.openOptionsPage()` を実行し、オプション画面を新規タブで開いてポップアップを閉じます。
 - **コピー実行とフィードバック**:
   - 項目クリック時は `chrome.runtime.sendMessage`（`POPUP_COPY_PAGE` / `POPUP_COPY_SELECTION`）経由で `src/background.ts` の共通コピー処理（`includeFavicon`, `faviconSize`, `renderTemplate`, Offscreen Document API 書き込み）を実行します。
-  - コピー成功時は完了フィードバック（「コピーしました」等）を短時間表示した後にポップアップを自動で閉じ、失敗時はエラーメッセージを表示します。
+  - コピー成功時は視認性の高い完了フィードバックバナー（「コピーしました」等）を一定時間（1.5 秒）表示した後にポップアップを自動で閉じ、失敗時はエラーバナーを表示します。
   - アクティブタブの URL が取得できない場合はページコピー項目を `disabled` とします。
 
 ### H. オプション画面（タブ表示：`package/options.html` / `src/options.ts`）

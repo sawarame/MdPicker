@@ -12,6 +12,9 @@ interface CopyResponse {
   error?: string;
 }
 
+/** コピー完了後の自動クローズまでの待機時間（ミリ秒） */
+const AUTO_CLOSE_DELAY_MS = 1500;
+
 /** 選択範囲のMarkdownテキスト（存在しない場合は空文字） */
 let cachedSelectionMarkdown = '';
 
@@ -62,7 +65,7 @@ async function executeCopyAndClose(action: () => Promise<CopyResponse>): Promise
       showStatus(copiedMsg, false);
       window.setTimeout(() => {
         window.close();
-      }, 650);
+      }, AUTO_CLOSE_DELAY_MS);
     } else {
       const failedMsg = chrome.i18n.getMessage('popupCopyFailed') || 'コピーに失敗しました';
       showStatus(failedMsg, true);
@@ -174,7 +177,7 @@ async function initializePopup(): Promise<void> {
 
   const pinnedContainer = document.getElementById('pinned-menu-list');
   const otherSection = document.getElementById('other-formats-section');
-  const otherToggleBtn = document.getElementById('btn-toggle-other') as HTMLButtonElement | null;
+  const otherHeading = document.getElementById('other-formats-heading');
   const otherSubmenu = document.getElementById('other-formats-list');
   const selectionBtn = document.getElementById('btn-copy-selection') as HTMLButtonElement | null;
 
@@ -190,29 +193,17 @@ async function initializePopup(): Promise<void> {
     });
   }
 
-  // 2. 未ピン留めテンプレートが1件以上ある場合は「その他の形式でコピー」セクションを構築
-  if (otherSection && otherToggleBtn && otherSubmenu) {
+  // 2. 未ピン留めテンプレートが1件以上ある場合は「その他の形式でコピー」を常時展開状態で表示
+  if (otherSection && otherHeading && otherSubmenu) {
     if (unpinned.length > 0) {
       otherSection.hidden = false;
-      const otherLabel = chrome.i18n.getMessage('contextMenuOtherFormatsPage') || 'その他の形式でコピー';
-      const labelSpan = otherToggleBtn.querySelector('.toggle-label');
-      if (labelSpan) {
-        labelSpan.textContent = otherLabel;
-      } else {
-        otherToggleBtn.textContent = otherLabel;
-      }
+      otherHeading.textContent =
+        chrome.i18n.getMessage('contextMenuOtherFormatsPage') || 'その他の形式でコピー';
 
       otherSubmenu.innerHTML = '';
       unpinned.forEach((template) => {
         const btn = createPageCopyButton(template, template.name, activeTab?.id, pageAvailable, true);
         otherSubmenu.appendChild(btn);
-      });
-
-      otherToggleBtn.addEventListener('click', () => {
-        const isExpanded = otherToggleBtn.getAttribute('aria-expanded') === 'true';
-        const nextExpanded = !isExpanded;
-        otherToggleBtn.setAttribute('aria-expanded', String(nextExpanded));
-        otherSubmenu.hidden = !nextExpanded;
       });
     } else {
       otherSection.hidden = true;
