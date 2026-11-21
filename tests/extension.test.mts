@@ -154,6 +154,7 @@ test('HTMLファイルとビルド成果物: popup.html/options.htmlおよびバ
   assert.match(popupHtml, /src="js\/popup\.js"/);
   assert.match(popupHtml, /id="btn-toggle-other"/);
   assert.match(popupHtml, /<div id="other-formats-list" class="submenu-list" hidden><\/div>/);
+  assert.match(popupHtml, /\.menu-section\[hidden\]/);
   assert.doesNotMatch(popupHtml, /other-formats-heading/);
   assert.match(optionsHtml, /src="js\/options\.js"/);
   assert.ok(fs.existsSync(path.join(rootDir, 'package', 'js', 'popup.js')));

@@ -150,8 +150,14 @@ async function fetchActiveSelectionMarkdown(tabId?: number): Promise<string> {
  * ポップアップ内のテンプレートメニューおよび各種ボタンを初期化・描画します。
  */
 async function initializePopup(): Promise<void> {
-  // ヘッダーのオプションボタンに多言語ラベルを適用
   const openOptionsBtn = document.getElementById('btn-open-options') as HTMLButtonElement | null;
+  const pinnedContainer = document.getElementById('pinned-menu-list');
+  const otherSection = document.getElementById('other-formats-section');
+  const otherToggleBtn = document.getElementById('btn-toggle-other') as HTMLButtonElement | null;
+  const otherSubmenu = document.getElementById('other-formats-list');
+  const selectionBtn = document.getElementById('btn-copy-selection') as HTMLButtonElement | null;
+
+  // 非同期取得完了前にちらつきが起きないよう、固定UI要素へ先に多言語ラベルを適用
   if (openOptionsBtn) {
     const openOptionsLabel = chrome.i18n.getMessage('contextMenuOpenOptions') || 'オプションを開く';
     openOptionsBtn.textContent = openOptionsLabel;
@@ -160,6 +166,21 @@ async function initializePopup(): Promise<void> {
       await chrome.runtime.openOptionsPage();
       window.close();
     });
+  }
+
+  if (otherToggleBtn) {
+    const otherLabel = chrome.i18n.getMessage('contextMenuOtherFormatsPage') || 'その他の形式でコピー';
+    const labelSpan = otherToggleBtn.querySelector('.toggle-label');
+    if (labelSpan) {
+      labelSpan.textContent = otherLabel;
+    } else {
+      otherToggleBtn.textContent = otherLabel;
+    }
+  }
+
+  if (selectionBtn) {
+    selectionBtn.textContent =
+      chrome.i18n.getMessage('contextMenuSelection') || '選択範囲をMarkdownとしてコピー';
   }
 
   // アクティブタブとストレージ設定を並列取得
@@ -174,12 +195,6 @@ async function initializePopup(): Promise<void> {
   const rawTemplates: FormatTemplate[] = storageResult.templates;
   const templateList = rawTemplates && rawTemplates.length > 0 ? rawTemplates : DEFAULT_TEMPLATES;
   const { pinned, unpinned } = partitionTemplatesByPinned(templateList);
-
-  const pinnedContainer = document.getElementById('pinned-menu-list');
-  const otherSection = document.getElementById('other-formats-section');
-  const otherToggleBtn = document.getElementById('btn-toggle-other') as HTMLButtonElement | null;
-  const otherSubmenu = document.getElementById('other-formats-list');
-  const selectionBtn = document.getElementById('btn-copy-selection') as HTMLButtonElement | null;
 
   // 1. ピン留めテンプレートのページリンクコピー項目を描画
   if (pinnedContainer) {
@@ -197,14 +212,6 @@ async function initializePopup(): Promise<void> {
   if (otherSection && otherToggleBtn && otherSubmenu) {
     if (unpinned.length > 0) {
       otherSection.hidden = false;
-      const otherLabel = chrome.i18n.getMessage('contextMenuOtherFormatsPage') || 'その他の形式でコピー';
-      const labelSpan = otherToggleBtn.querySelector('.toggle-label');
-      if (labelSpan) {
-        labelSpan.textContent = otherLabel;
-      } else {
-        otherToggleBtn.textContent = otherLabel;
-      }
-
       otherSubmenu.innerHTML = '';
       unpinned.forEach((template) => {
         const btn = createPageCopyButton(template, template.name, activeTab?.id, pageAvailable, true);
@@ -222,11 +229,8 @@ async function initializePopup(): Promise<void> {
     }
   }
 
-  // 3. 選択範囲をMarkdownとしてコピー項目の設定・選択有無確認
+  // 3. 選択範囲をMarkdownとしてコピー項目の選択有無確認
   if (selectionBtn) {
-    selectionBtn.textContent =
-      chrome.i18n.getMessage('contextMenuSelection') || '選択範囲をMarkdownとしてコピー';
-
     // 選択確認が完了するまでは非活性として誤操作を防ぐ
     selectionBtn.disabled = true;
     selectionBtn.dataset.initiallyDisabled = 'true';
