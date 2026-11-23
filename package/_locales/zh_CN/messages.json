@@ -1,0 +1,178 @@
+{
+  "appName": {
+    "message": "MdPicker - Markdown 链接复制工具",
+    "description": "拡張機能の名前。"
+  },
+  "appDesc": {
+    "message": "右键即可将链接、选中文本或页面信息复制为 Markdown 格式。支持为页面链接添加网站图标（favicon）并自定义尺寸。",
+    "description": "拡張機能の説明。"
+  },
+  "contextMenuTitle": {
+    "message": "将链接复制为 Markdown",
+    "description": "コンテキストメニューの項目名。"
+  },
+  "contextMenuSelection": {
+    "message": "将选中内容复制为 Markdown",
+    "description": "選択テキスト用コンテキストメニューの項目名。"
+  },
+  "contextMenuPage": {
+    "message": "将此页面复制为 Markdown 链接",
+    "description": "ページ全体用コンテキストメニューの項目名。"
+  },
+  "contextMenuCopyLinkAs": {
+    "message": "将链接复制为...",
+    "description": "リンクを別形式でコピーする親コンテキストメニューの項目名。"
+  },
+  "contextMenuCopyPageAs": {
+    "message": "将页面复制为...",
+    "description": "ページを別形式でコピーする親コンテキストメニューの項目名。"
+  },
+  "optionIncludeFavicon": {
+    "message": "在页面链接中包含网站图标（favicon）",
+    "description": "オプション画面：faviconを含めるかどうかのラベル。"
+  },
+  "optionsSaved": {
+    "message": "设置已保存",
+    "description": "オプション画面：保存完了メッセージ。"
+  },
+  "optionFaviconSize": {
+    "message": "尺寸：",
+    "description": "オプション画面：faviconサイズのラベル。"
+  },
+  "optionsTemplatesTitle": {
+    "message": "格式模板",
+    "description": "オプション画面：テンプレート設定セクションの見出し。"
+  },
+  "optionsTemplatesDesc": {
+    "message": "管理右键菜单「将链接/页面复制为...」和快捷键中使用的格式模板。",
+    "description": "オプション画面：テンプレート設定の説明。"
+  },
+  "optionsShortcutTemplate": {
+    "message": "默认格式：",
+    "description": "オプション画面：デフォルトテンプレート設定ラベル。"
+  },
+  "optionsResetTemplates": {
+    "message": "恢复默认模板",
+    "description": "オプション画面：初期設定へのリセットボタン。"
+  },
+  "optionsResetConfirm": {
+    "message": "再次点击确认恢复默认",
+    "description": "オプション画面：リセット確認メッセージ。"
+  },
+  "optionsAddTemplate": {
+    "message": "添加",
+    "description": "オプション画面：テンプレート追加ボタン。"
+  },
+  "optionsTemplateNamePlaceholder": {
+    "message": "名称（例如: Notion）",
+    "description": "オプション画面：テンプレート名プレースホルダー。"
+  },
+  "optionsTemplateFormatPlaceholder": {
+    "message": "格式（例如: [$${title}]($${url})）",
+    "description": "オプション画面：テンプレート形式プレースホルダー。"
+  },
+  "optionsVariablesHelp": {
+    "message": "可用变量: $${title}（标题 / 链接文本）, $${url}（URL）, $${date}（日期: YYYY-MM-DD）, $${time}（时间: HH:mm）, $${favicon}（网站图标 URL）",
+    "description": "オプション画面：変数ヘルプ。"
+  },
+  "optionsDelete": {
+    "message": "删除",
+    "description": "オプション画面：削除ボタン。"
+  },
+  "optionsThName": {
+    "message": "名称",
+    "description": "オプション画面：テンプレート一覧の名前列ヘッダー。"
+  },
+  "optionsThMimeType": {
+    "message": "MIME 类型",
+    "description": "オプション画面：テンプレート一覧のMIMEタイプ列ヘッダー。"
+  },
+  "optionsThFormat": {
+    "message": "格式",
+    "description": "オプション画面：テンプレート一覧の形式列ヘッダー。"
+  },
+  "optionsThActions": {
+    "message": "操作",
+    "description": "オプション画面：テンプレート一覧の操作列ヘッダー。"
+  },
+  "optionsThPinned": {
+    "message": "置顶显示",
+    "description": "オプション画面：テンプレート一覧のトップレベル表示（ピン留め）列ヘッダー。"
+  },
+  "optionsThOrder": {
+    "message": "排序",
+    "description": "オプション画面：テンプレート一覧の並び替え列ヘッダー。"
+  },
+  "optionsMoveUp": {
+    "message": "上移",
+    "description": "オプション画面：テンプレートを1つ上に移動するボタンのラベル。"
+  },
+  "optionsMoveDown": {
+    "message": "下移",
+    "description": "オプション画面：テンプレートを1つ下に移動するボタンのラベル。"
+  },
+  "optionsDragHandle": {
+    "message": "拖动排序",
+    "description": "オプション画面：テンプレート行のドラッグハンドルのラベル。"
+  },
+  "contextMenuCopyLinkAsFormat": {
+    "message": "以 $FORMAT$ 格式复制链接",
+    "description": "トップレベルのリンクコピー用コンテキストメニューの項目名。",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuCopyPageAsFormat": {
+    "message": "以 $FORMAT$ 格式复制页面链接",
+    "description": "トップレベルのページリンク作成用コンテキストメニューの項目名。",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuOtherFormatsLink": {
+    "message": "以其他格式复制链接...",
+    "description": "リンク用の未ピン留めテンプレートをまとめるサブメニュー項目名。"
+  },
+  "contextMenuOtherFormatsPage": {
+    "message": "以其他格式复制页面...",
+    "description": "ページ用の未ピン留めテンプレートをまとめるサブメニュー項目名。"
+  },
+  "contextMenuOpenOptions": {
+    "message": "打开选项",
+    "description": "拡張機能アイコンの右クリックメニューやポップアップからオプション画面（タブ）を開く項目名。"
+  },
+  "popupCopied": {
+    "message": "已复制！",
+    "description": "ポップアップでクリップボードへのコピーが完了した際のフィードバックメッセージ。"
+  },
+  "popupCopyFailed": {
+    "message": "复制失败",
+    "description": "ポップアップでクリップボードへのコピーに失敗した際のエラーメッセージ。"
+  },
+  "popupNoSelection": {
+    "message": "当前页面未选中文本",
+    "description": "ポップアップで選択範囲コピーが無効な理由を示すツールチップ文言。"
+  },
+  "popupPageUnavailable": {
+    "message": "无法获取此页面信息",
+    "description": "アクティブタブのURL等を取得できない場合のエラー・ツールチップ文言。"
+  },
+  "commandSmartCopyDesc": {
+    "message": "将选中内容或页面复制为 Markdown",
+    "description": "スマートコピー用キーボードショートカットの説明。"
+  },
+  "optionLanguage": {
+    "message": "显示语言：",
+    "description": "オプション画面：表示言語設定のラベル。"
+  },
+  "optionLanguageAuto": {
+    "message": "自动（跟随浏览器语言）",
+    "description": "オプション画面：ブラウザの表示言語に自動追従する選択肢のラベル。"
+  }
+}

@@ -162,5 +162,17 @@
   "popupPageUnavailable": {
     "message": "このページの情報を取得できません",
     "description": "アクティブタブのURL等を取得できない場合のエラー・ツールチップ文言。"
+  },
+  "commandSmartCopyDesc": {
+    "message": "選択範囲またはページをMarkdownとしてコピー",
+    "description": "スマートコピー用キーボードショートカットの説明。"
+  },
+  "optionLanguage": {
+    "message": "表示言語：",
+    "description": "オプション画面：表示言語設定のラベル。"
+  },
+  "optionLanguageAuto": {
+    "message": "自動（ブラウザの言語）",
+    "description": "オプション画面：ブラウザの表示言語に自動追従する選択肢のラベル。"
   }
 }

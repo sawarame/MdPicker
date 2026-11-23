@@ -3,6 +3,13 @@
  */
 
 import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType, isTemplatePinned, reorderTemplates } from './template';
+import {
+  I18nContext,
+  LANGUAGE_OPTIONS,
+  LANGUAGE_STORAGE_KEY,
+  loadI18nContext,
+  normalizeLanguageSetting
+} from './i18n';
 
 /**
  * 現在管理されているテンプレート一覧のインメモリ配列。
@@ -10,9 +17,32 @@ import { FormatTemplate, DEFAULT_TEMPLATES, ClipboardMimeType, isTemplatePinned,
 let currentTemplates: FormatTemplate[] = [];
 
 /**
+ * 現在適用されている多言語コンテキスト。
+ */
+let currentI18n: I18nContext | null = null;
+
+/**
+ * 言語切り替えの非同期処理競合を防ぐための世代カウンター。
+ */
+let languageSwitchVersion = 0;
+
+/**
  * ドラッグ中のテンプレート行のインデックス番号。ドラッグ中でない場合は null。
  */
 let dragSourceIndex: number | null = null;
+
+/**
+ * 現在適用されている言語設定に従って翻訳メッセージを取得します。
+ * @param key - messages.json のメッセージキー
+ * @param substitutions - プレースホルダー置換引数（任意）
+ * @returns 翻訳済み文字列
+ */
+const getLocalizedMessage = (key: string, substitutions?: string | string[]): string => {
+  if (currentI18n) {
+    return currentI18n.getMessage(key, substitutions);
+  }
+  return chrome.i18n.getMessage(key, substitutions) || '';
+};
 
 /**
  * 保存完了ステータスを表示します。
@@ -20,7 +50,7 @@ let dragSourceIndex: number | null = null;
 const showSavedStatus = (): void => {
   const status = document.getElementById('status');
   if (status) {
-    status.textContent = chrome.i18n.getMessage('optionsSaved');
+    status.textContent = getLocalizedMessage('optionsSaved') || 'Options saved';
     status.style.color = '#28a745';
     setTimeout(() => {
       status.textContent = '';
@@ -201,7 +231,7 @@ const createOrderCell = (index: number): HTMLTableCellElement => {
   const dragHandle = document.createElement('span');
   dragHandle.className = 'drag-handle';
   dragHandle.textContent = '⋮⋮';
-  const dragLabel = chrome.i18n.getMessage('optionsDragHandle') || 'ドラッグして並び替え';
+  const dragLabel = getLocalizedMessage('optionsDragHandle') || 'Drag to reorder';
   dragHandle.title = dragLabel;
   dragHandle.setAttribute('aria-label', dragLabel);
   if (currentTemplates.length <= 1) {
@@ -215,7 +245,7 @@ const createOrderCell = (index: number): HTMLTableCellElement => {
   upBtn.className = 'btn-move';
   upBtn.dataset.move = 'up';
   upBtn.textContent = '↑';
-  const upLabel = chrome.i18n.getMessage('optionsMoveUp') || '上へ移動';
+  const upLabel = getLocalizedMessage('optionsMoveUp') || 'Move up';
   upBtn.title = upLabel;
   upBtn.setAttribute('aria-label', upLabel);
   upBtn.disabled = index === 0;
@@ -229,7 +259,7 @@ const createOrderCell = (index: number): HTMLTableCellElement => {
   downBtn.className = 'btn-move';
   downBtn.dataset.move = 'down';
   downBtn.textContent = '↓';
-  const downLabel = chrome.i18n.getMessage('optionsMoveDown') || '下へ移動';
+  const downLabel = getLocalizedMessage('optionsMoveDown') || 'Move down';
   downBtn.title = downLabel;
   downBtn.setAttribute('aria-label', downLabel);
   downBtn.disabled = index === currentTemplates.length - 1;
@@ -337,7 +367,7 @@ const renderTemplates = (): void => {
     const pinCheckbox = document.createElement('input');
     pinCheckbox.type = 'checkbox';
     pinCheckbox.checked = isTemplatePinned(template);
-    pinCheckbox.title = chrome.i18n.getMessage('optionsThPinned') || 'トップレベル';
+    pinCheckbox.title = getLocalizedMessage('optionsThPinned') || 'Pin to top';
     pinCheckbox.addEventListener('change', () => {
       template.pinned = pinCheckbox.checked;
       saveTemplates();
@@ -369,7 +399,7 @@ const renderTemplates = (): void => {
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'btn-delete';
-    deleteBtn.textContent = chrome.i18n.getMessage('optionsDelete') || '削除';
+    deleteBtn.textContent = getLocalizedMessage('optionsDelete') || 'Delete';
     deleteBtn.addEventListener('click', () => {
       deleteTemplate(index);
     });
@@ -457,7 +487,7 @@ const resetTemplates = (): void => {
   if (!isResetConfirming) {
     // 1回目のクリック: 確認状態へ移行
     isResetConfirming = true;
-    const confirmMsg = chrome.i18n.getMessage('optionsResetConfirm') || '本当に初期状態に戻しますか？（再度クリック）';
+    const confirmMsg = getLocalizedMessage('optionsResetConfirm') || 'Click again to confirm reset';
     btn.textContent = confirmMsg;
     btn.style.backgroundColor = '#d73a49';
     btn.style.color = '#ffffff';
@@ -470,7 +500,7 @@ const resetTemplates = (): void => {
     resetTimer = window.setTimeout(() => {
       isResetConfirming = false;
       resetTimer = null;
-      btn.textContent = chrome.i18n.getMessage('optionsResetTemplates') || '初期テンプレートに戻す';
+      btn.textContent = getLocalizedMessage('optionsResetTemplates') || 'Reset to default templates';
       btn.style.backgroundColor = '';
       btn.style.color = '';
       btn.style.borderColor = '';
@@ -484,7 +514,7 @@ const resetTemplates = (): void => {
     resetTimer = null;
   }
   isResetConfirming = false;
-  btn.textContent = chrome.i18n.getMessage('optionsResetTemplates') || '初期テンプレートに戻す';
+  btn.textContent = getLocalizedMessage('optionsResetTemplates') || 'Reset to default templates';
   btn.style.backgroundColor = '';
   btn.style.color = '';
   btn.style.borderColor = '';
@@ -496,10 +526,65 @@ const resetTemplates = (): void => {
 };
 
 /**
+ * 表示言語ドロップダウンの選択肢を構築・更新します。
+ * @param selectedSetting - 選択状態にする言語設定値
+ */
+const renderLanguageOptions = (selectedSetting: string): void => {
+  const languageSelect = document.getElementById('language-select') as HTMLSelectElement | null;
+  if (!languageSelect) return;
+
+  const autoLabel = getLocalizedMessage('optionLanguageAuto') || 'Auto (Browser language)';
+  languageSelect.innerHTML = '';
+
+  const autoOpt = document.createElement('option');
+  autoOpt.value = 'auto';
+  autoOpt.textContent = autoLabel;
+  languageSelect.appendChild(autoOpt);
+
+  LANGUAGE_OPTIONS.forEach((option) => {
+    const opt = document.createElement('option');
+    opt.value = option.value;
+    opt.textContent = option.label;
+    languageSelect.appendChild(opt);
+  });
+
+  languageSelect.value = normalizeLanguageSetting(selectedSetting);
+};
+
+/**
+ * 表示言語設定を保存し、リロード不要でオプション画面全体へ即時反映します。
+ */
+const saveLanguageOption = async (): Promise<void> => {
+  const languageSelect = document.getElementById('language-select') as HTMLSelectElement | null;
+  if (!languageSelect) return;
+
+  const nextLanguage = normalizeLanguageSetting(languageSelect.value);
+  const currentVersion = ++languageSwitchVersion;
+
+  await chrome.storage.sync.set({ [LANGUAGE_STORAGE_KEY]: nextLanguage });
+  const nextI18n = await loadI18nContext(nextLanguage);
+
+  if (currentVersion !== languageSwitchVersion) {
+    return;
+  }
+
+  currentI18n = nextI18n;
+  renderLanguageOptions(currentI18n.setting);
+  applyLocalization();
+  renderTemplates();
+  showSavedStatus();
+};
+
+/**
  * 各種テキストラベルを国際化対応（i18n）して適用します。
  */
 const applyLocalization = (): void => {
+  if (currentI18n) {
+    document.documentElement.lang = currentI18n.htmlLang;
+  }
+
   const elementsToLocalize: Array<{ id: string; key: string }> = [
+    { id: 'label-language', key: 'optionLanguage' },
     { id: 'label-include-favicon', key: 'optionIncludeFavicon' },
     { id: 'label-favicon-size', key: 'optionFaviconSize' },
     { id: 'heading-templates', key: 'optionsTemplatesTitle' },
@@ -511,7 +596,10 @@ const applyLocalization = (): void => {
     { id: 'th-mimetype', key: 'optionsThMimeType' },
     { id: 'th-format', key: 'optionsThFormat' },
     { id: 'th-actions', key: 'optionsThActions' },
-    { id: 'btn-reset-templates', key: 'optionsResetTemplates' },
+    {
+      id: 'btn-reset-templates',
+      key: isResetConfirming ? 'optionsResetConfirm' : 'optionsResetTemplates'
+    },
     { id: 'btn-add-template', key: 'optionsAddTemplate' },
     { id: 'variables-help', key: 'optionsVariablesHelp' }
   ];
@@ -519,58 +607,59 @@ const applyLocalization = (): void => {
   elementsToLocalize.forEach(({ id, key }) => {
     const el = document.getElementById(id);
     if (el) {
-      const msg = chrome.i18n.getMessage(key);
+      const msg = getLocalizedMessage(key);
       if (msg) el.textContent = msg;
     }
   });
 
   const nameInput = document.getElementById('new-template-name') as HTMLInputElement;
   if (nameInput) {
-    nameInput.placeholder = chrome.i18n.getMessage('optionsTemplateNamePlaceholder') || 'Name';
+    nameInput.placeholder = getLocalizedMessage('optionsTemplateNamePlaceholder') || 'Name';
   }
 
   const formatInput = document.getElementById('new-template-format') as HTMLInputElement;
   if (formatInput) {
-    formatInput.placeholder = chrome.i18n.getMessage('optionsTemplateFormatPlaceholder') || 'Format';
+    formatInput.placeholder = getLocalizedMessage('optionsTemplateFormatPlaceholder') || 'Format';
   }
 };
 
 /**
  * 保存された設定をストレージから読み込み、画面に反映します。
  */
-const restoreOptions = (): void => {
+const restoreOptions = async (): Promise<void> => {
+  const items = await chrome.storage.sync.get({
+    includeFavicon: false,
+    faviconSize: '16',
+    templates: DEFAULT_TEMPLATES,
+    shortcutTemplateId: 'markdown',
+    [LANGUAGE_STORAGE_KEY]: 'auto'
+  });
+
+  currentI18n = await loadI18nContext(items[LANGUAGE_STORAGE_KEY]);
+  renderLanguageOptions(currentI18n.setting);
   applyLocalization();
 
-  chrome.storage.sync.get(
-    { 
-      includeFavicon: false,
-      faviconSize: '16',
-      templates: DEFAULT_TEMPLATES,
-      shortcutTemplateId: 'markdown'
-    },
-    (items) => {
-      const includeCheckbox = document.getElementById('include-favicon') as HTMLInputElement;
-      const sizeSelect = document.getElementById('favicon-size') as HTMLSelectElement;
-      
-      includeCheckbox.checked = items.includeFavicon;
-      sizeSelect.value = items.faviconSize;
-      
-      toggleSizeVisibility(items.includeFavicon);
+  const includeCheckbox = document.getElementById('include-favicon') as HTMLInputElement;
+  const sizeSelect = document.getElementById('favicon-size') as HTMLSelectElement;
 
-      const rawTemplates = items.templates && items.templates.length > 0 
-        ? items.templates 
-        : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+  includeCheckbox.checked = Boolean(items.includeFavicon);
+  sizeSelect.value = String(items.faviconSize || '16');
 
-      // 既存設定に mimeType や pinned が未設定の場合は補完（HTMLプリセットは text/html、その他は text/plain）
-      currentTemplates = rawTemplates.map((t: FormatTemplate) => ({
-        ...t,
-        mimeType: t.mimeType || (t.id === 'html' ? 'text/html' : 'text/plain'),
-        pinned: isTemplatePinned(t)
-      }));
+  toggleSizeVisibility(Boolean(items.includeFavicon));
 
-      renderTemplates();
-    }
-  );
+  const rawTemplates: FormatTemplate[] =
+    items.templates && items.templates.length > 0
+      ? items.templates
+      : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+
+  // 既存設定に mimeType や pinned が未設定の場合は補完（HTMLプリセットは text/html、その他は text/plain）
+  currentTemplates = rawTemplates.map((t: FormatTemplate) => ({
+    ...t,
+    mimeType: t.mimeType || (t.id === 'html' ? 'text/html' : 'text/plain'),
+    pinned: isTemplatePinned(t)
+  }));
+
+  renderTemplates();
 };
 
 /**
@@ -589,7 +678,13 @@ const toggleSizeVisibility = (visible: boolean): void => {
 };
 
 // イベントリスナーの登録
-document.addEventListener('DOMContentLoaded', restoreOptions);
+document.addEventListener('DOMContentLoaded', () => {
+  void restoreOptions();
+});
+
+document.getElementById('language-select')?.addEventListener('change', () => {
+  void saveLanguageOption();
+});
 
 document.getElementById('include-favicon')?.addEventListener('change', (e) => {
   toggleSizeVisibility((e.target as HTMLInputElement).checked);

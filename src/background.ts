@@ -9,6 +9,10 @@ import {
   partitionTemplatesByPinned,
   formatPageWithTemplate
 } from './template';
+import { LANGUAGE_STORAGE_KEY, loadI18nContext } from './i18n';
+
+/** コンテキストメニュー再構築の競合を防ぐための世代カウンター */
+let contextMenuSetupVersion = 0;
 
 /**
  * 現在のタブまたはドメインからファビコンのURLを取得します。
@@ -27,110 +31,127 @@ function getFaviconUrl(tabUrl: string, faviconSize: string = '16', fallbackUrl?:
 }
 
 /**
- * 保存されているテンプレート設定を読み込み、コンテキストメニューを再構築します。
+ * 保存されているテンプレート設定と言語設定を読み込み、コンテキストメニューを再構築します。
  * ピン留めされたテンプレートは第1階層（トップレベル）に直接登録し、
  * 未ピン留めのテンプレートは「その他の形式でコピー」サブメニュー内に集約します。
  */
 async function setupContextMenus(): Promise<void> {
-  chrome.contextMenus.removeAll(async () => {
-    // ストレージからテンプレート一覧を取得
-    const { templates } = await chrome.storage.sync.get({
-      templates: DEFAULT_TEMPLATES
+  const currentVersion = ++contextMenuSetupVersion;
+
+  // ストレージからテンプレート一覧と言語設定を先に取得
+  const stored = await chrome.storage.sync.get({
+    templates: DEFAULT_TEMPLATES,
+    [LANGUAGE_STORAGE_KEY]: 'auto'
+  });
+
+  const i18n = await loadI18nContext(stored[LANGUAGE_STORAGE_KEY]);
+
+  // 待機中に新しい再構築要求が開始されていた場合は古い処理を中断
+  if (currentVersion !== contextMenuSetupVersion) {
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    chrome.contextMenus.removeAll(() => resolve());
+  });
+
+  if (currentVersion !== contextMenuSetupVersion) {
+    return;
+  }
+
+  const templates = stored.templates;
+  const templateList: FormatTemplate[] = templates && templates.length > 0 ? templates : DEFAULT_TEMPLATES;
+  const { pinned: pinnedTemplates, unpinned: unpinnedTemplates } = partitionTemplatesByPinned(templateList);
+
+  // 1. リンク用コンテキストメニューの登録
+  // ピン留めされた形式をトップレベルに登録
+  pinnedTemplates.forEach((t) => {
+    const title = i18n.getMessage('contextMenuCopyLinkAsFormat', [t.name]) || `Copy Link as ${t.name}`;
+    chrome.contextMenus.create({
+      id: `template:link:${t.id}`,
+      title: title,
+      contexts: ['link']
+    });
+  });
+
+  // 未ピン留めのテンプレートが1件以上存在する場合はサブメニュー内に格納
+  if (unpinnedTemplates.length > 0) {
+    const parentTitle = i18n.getMessage('contextMenuOtherFormatsLink') || 'Copy link in other formats...';
+    chrome.contextMenus.create({
+      id: 'copy-link-as-template-parent',
+      title: parentTitle,
+      contexts: ['link']
     });
 
-    const templateList: FormatTemplate[] = templates && templates.length > 0 ? templates : DEFAULT_TEMPLATES;
-    const { pinned: pinnedTemplates, unpinned: unpinnedTemplates } = partitionTemplatesByPinned(templateList);
-
-    // 1. リンク用コンテキストメニューの登録
-    // ピン留めされた形式をトップレベルに登録
-    pinnedTemplates.forEach((t) => {
-      const title = chrome.i18n.getMessage('contextMenuCopyLinkAsFormat', [t.name]) || `${t.name}形式でリンクをコピー`;
+    unpinnedTemplates.forEach((t) => {
       chrome.contextMenus.create({
         id: `template:link:${t.id}`,
-        title: title,
+        parentId: 'copy-link-as-template-parent',
+        title: t.name,
         contexts: ['link']
       });
     });
+  }
 
-    // 未ピン留めのテンプレートが1件以上存在する場合はサブメニュー内に格納
-    if (unpinnedTemplates.length > 0) {
-      const parentTitle = chrome.i18n.getMessage('contextMenuOtherFormatsLink') || 'その他の形式でコピー';
-      chrome.contextMenus.create({
-        id: 'copy-link-as-template-parent',
-        title: parentTitle,
-        contexts: ['link']
-      });
+  // 2. 選択テキスト用コンテキストメニュー（トップレベル）
+  chrome.contextMenus.create({
+    id: 'copy-selection-as-markdown',
+    title: i18n.getMessage('contextMenuSelection') || 'Copy selection as Markdown',
+    contexts: ['selection']
+  });
 
-      unpinnedTemplates.forEach((t) => {
-        chrome.contextMenus.create({
-          id: `template:link:${t.id}`,
-          parentId: 'copy-link-as-template-parent',
-          title: t.name,
-          contexts: ['link']
-        });
-      });
-    }
-
-    // 2. 選択テキスト用コンテキストメニュー（トップレベル）
+  // 3. ページ余白用コンテキストメニューの登録
+  // ピン留めされた形式をトップレベルに登録
+  pinnedTemplates.forEach((t) => {
+    const title = i18n.getMessage('contextMenuCopyPageAsFormat', [t.name]) || `Copy Page Link as ${t.name}`;
     chrome.contextMenus.create({
-      id: 'copy-selection-as-markdown',
-      title: chrome.i18n.getMessage('contextMenuSelection'),
-      contexts: ['selection']
+      id: `template:page:${t.id}`,
+      title: title,
+      contexts: ['page']
+    });
+  });
+
+  // 未ピン留めのテンプレートが1件以上存在する場合はサブメニュー内に格納
+  if (unpinnedTemplates.length > 0) {
+    const parentTitle = i18n.getMessage('contextMenuOtherFormatsPage') || 'Copy page in other formats...';
+    chrome.contextMenus.create({
+      id: 'copy-page-as-template-parent',
+      title: parentTitle,
+      contexts: ['page']
     });
 
-    // 3. ページ余白用コンテキストメニューの登録
-    // ピン留めされた形式をトップレベルに登録
-    pinnedTemplates.forEach((t) => {
-      const title = chrome.i18n.getMessage('contextMenuCopyPageAsFormat', [t.name]) || `${t.name}形式でページのリンクを作成`;
+    unpinnedTemplates.forEach((t) => {
       chrome.contextMenus.create({
         id: `template:page:${t.id}`,
-        title: title,
+        parentId: 'copy-page-as-template-parent',
+        title: t.name,
         contexts: ['page']
       });
     });
+  }
 
-    // 未ピン留めのテンプレートが1件以上存在する場合はサブメニュー内に格納
-    if (unpinnedTemplates.length > 0) {
-      const parentTitle = chrome.i18n.getMessage('contextMenuOtherFormatsPage') || 'その他の形式でコピー';
-      chrome.contextMenus.create({
-        id: 'copy-page-as-template-parent',
-        title: parentTitle,
-        contexts: ['page']
-      });
-
-      unpinnedTemplates.forEach((t) => {
-        chrome.contextMenus.create({
-          id: `template:page:${t.id}`,
-          parentId: 'copy-page-as-template-parent',
-          title: t.name,
-          contexts: ['page']
-        });
-      });
-    }
-
-    // 4. 拡張機能アイコン右クリック用のオプション画面（タブ表示）メニュー
-    chrome.contextMenus.create({
-      id: 'open-options',
-      title: chrome.i18n.getMessage('contextMenuOpenOptions') || 'オプションを開く',
-      contexts: ['action']
-    });
+  // 4. 拡張機能アイコン右クリック用のオプション画面（タブ表示）メニュー
+  chrome.contextMenus.create({
+    id: 'open-options',
+    title: i18n.getMessage('contextMenuOpenOptions') || 'Open Options',
+    contexts: ['action']
   });
 }
 
 // 拡張機能インストール・アップデート時の初期化
 chrome.runtime.onInstalled.addListener(() => {
-  setupContextMenus();
+  void setupContextMenus();
 });
 
 // ブラウザ起動時の初期化
 chrome.runtime.onStartup.addListener(() => {
-  setupContextMenus();
+  void setupContextMenus();
 });
 
-// オプション画面等でテンプレート設定が変更された際にメニューを自動更新
+// オプション画面等でテンプレート設定や表示言語が変更された際にメニューを自動更新
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'sync' && changes.templates) {
-    setupContextMenus();
+  if (areaName === 'sync' && (changes.templates || changes[LANGUAGE_STORAGE_KEY])) {
+    void setupContextMenus();
   }
 });
 

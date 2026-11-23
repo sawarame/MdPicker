@@ -13,6 +13,15 @@ import {
   renderTemplate,
   formatPageWithTemplate
 } from '../src/template.ts';
+import {
+  SUPPORTED_LOCALES,
+  normalizeLanguageSetting,
+  resolveBrowserLocale,
+  resolveEffectiveLocale,
+  localeToHtmlLang,
+  formatChromeMessage,
+  createMessageGetter
+} from '../src/i18n.ts';
 
 test('partitionTemplatesByPinned: デフォルトテンプレートをピン留めと未ピン留めに振り分ける', () => {
   const { pinned, unpinned } = partitionTemplatesByPinned(DEFAULT_TEMPLATES);
@@ -106,12 +115,14 @@ test('renderTemplate: 日付・時刻・タイトル・URLがすべて置換さ�
   assert.match(rendered, /^\[MdPicker\]\(https:\/\/github\.com\/sawarame\/MdPicker\) \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
 });
 
-test('manifest.json: ポップアップ設定・オプションタブ設定・権限が仕様どおりである', () => {
+test('manifest.json: ポップアップ設定・オプションタブ設定・権限・多言語設定が仕様どおりである', () => {
   const rootDir = path.resolve(import.meta.dirname, '..');
   const manifest = JSON.parse(
     fs.readFileSync(path.join(rootDir, 'package', 'manifest.json'), 'utf8')
   );
 
+  assert.equal(manifest.default_locale, 'en');
+  assert.equal(manifest.commands?.['smart-copy']?.description, '__MSG_commandSmartCopyDesc__');
   assert.equal(manifest.action?.default_popup, 'popup.html');
   assert.deepEqual(manifest.options_ui, {
     page: 'options.html',
@@ -127,22 +138,145 @@ test('manifest.json: ポップアップ設定・オプションタブ設定・�
   assert.equal(manifest.host_permissions, undefined);
 });
 
-test('ロケールファイル: 日英messages.jsonのキーが一致し空文字が存在しない', () => {
+test('i18n: 言語設定の正規化とブラウザ言語からのロケール解決・英語フォールバック', () => {
+  // 設定値の正規化
+  assert.equal(normalizeLanguageSetting('auto'), 'auto');
+  assert.equal(normalizeLanguageSetting('ja'), 'ja');
+  assert.equal(normalizeLanguageSetting('en'), 'en');
+  assert.equal(normalizeLanguageSetting('zh_CN'), 'zh_CN');
+  assert.equal(normalizeLanguageSetting('zh_TW'), 'zh_TW');
+  assert.equal(normalizeLanguageSetting('ko'), 'ko');
+  assert.equal(normalizeLanguageSetting(undefined), 'auto');
+  assert.equal(normalizeLanguageSetting(null), 'auto');
+  assert.equal(normalizeLanguageSetting('fr'), 'auto');
+
+  // ブラウザ言語解決（日本語・韓国語・英語）
+  assert.equal(resolveBrowserLocale('ja'), 'ja');
+  assert.equal(resolveBrowserLocale('ja-JP'), 'ja');
+  assert.equal(resolveBrowserLocale('JA_jp'), 'ja');
+  assert.equal(resolveBrowserLocale('ko'), 'ko');
+  assert.equal(resolveBrowserLocale('ko-KR'), 'ko');
+  assert.equal(resolveBrowserLocale('en'), 'en');
+  assert.equal(resolveBrowserLocale('en-US'), 'en');
+  assert.equal(resolveBrowserLocale('en_GB'), 'en');
+
+  // 中国語（簡体字・繁体字）の地域・文字タグ判別
+  assert.equal(resolveBrowserLocale('zh'), 'zh_CN');
+  assert.equal(resolveBrowserLocale('zh-CN'), 'zh_CN');
+  assert.equal(resolveBrowserLocale('zh_CN'), 'zh_CN');
+  assert.equal(resolveBrowserLocale('zh-SG'), 'zh_CN');
+  assert.equal(resolveBrowserLocale('zh-Hans'), 'zh_CN');
+  assert.equal(resolveBrowserLocale('zh-Hans-CN'), 'zh_CN');
+  assert.equal(resolveBrowserLocale('zh-TW'), 'zh_TW');
+  assert.equal(resolveBrowserLocale('zh_TW'), 'zh_TW');
+  assert.equal(resolveBrowserLocale('zh-HK'), 'zh_TW');
+  assert.equal(resolveBrowserLocale('zh-MO'), 'zh_TW');
+  assert.equal(resolveBrowserLocale('zh-Hant'), 'zh_TW');
+  assert.equal(resolveBrowserLocale('zh-Hant-TW'), 'zh_TW');
+
+  // 未対応言語は英語へフォールバック
+  assert.equal(resolveBrowserLocale('fr'), 'en');
+  assert.equal(resolveBrowserLocale('de-DE'), 'en');
+  assert.equal(resolveBrowserLocale('es-ES'), 'en');
+  assert.equal(resolveBrowserLocale(''), 'en');
+  assert.equal(resolveBrowserLocale(undefined), 'en');
+
+  // 有効ロケール決定（手動優先・auto時はブラウザ追従）
+  assert.equal(resolveEffectiveLocale('auto', 'ko-KR'), 'ko');
+  assert.equal(resolveEffectiveLocale('auto', 'fr-FR'), 'en');
+  assert.equal(resolveEffectiveLocale('zh_TW', 'ja-JP'), 'zh_TW');
+  assert.equal(resolveEffectiveLocale('invalid', 'ja-JP'), 'ja');
+
+  // HTML lang 属性変換
+  assert.equal(localeToHtmlLang('zh_CN'), 'zh-CN');
+  assert.equal(localeToHtmlLang('zh_TW'), 'zh-TW');
+  assert.equal(localeToHtmlLang('ja'), 'ja');
+});
+
+test('i18n: Chrome messages.json のプレースホルダー置換・$$アンエスケープ・フォールバック解決', () => {
+  const formatted = formatChromeMessage(
+    {
+      message: '$FORMAT$形式でリンクをコピー',
+      placeholders: {
+        format: { content: '$1' }
+      }
+    },
+    ['Markdown']
+  );
+  assert.equal(formatted, 'Markdown形式でリンクをコピー');
+
+  // 置換値に $ が含まれていても二重置換されないこと
+  const dollarSafe = formatChromeMessage(
+    {
+      message: 'Copy Link as $FORMAT$',
+      placeholders: {
+        format: { content: '$1' }
+      }
+    },
+    ['$100 $$test']
+  );
+  assert.equal(dollarSafe, 'Copy Link as $100 $$test');
+
+  // $$ のアンエスケープ
+  const escaped = formatChromeMessage({
+    message: 'Format (e.g. [$${title}]($${url}))'
+  });
+  assert.equal(escaped, 'Format (e.g. [${title}](${url}))');
+
+  // 辞書フォールバック階層（主辞書 -> 英語辞書 -> 最終フォールバック）
+  const getMessage = createMessageGetter(
+    { onlyPrimary: { message: 'Primary Value' } },
+    { onlyFallback: { message: 'English Fallback' } },
+    (key) => (key === 'onlyChrome' ? 'Chrome Fallback' : '')
+  );
+  assert.equal(getMessage('onlyPrimary'), 'Primary Value');
+  assert.equal(getMessage('onlyFallback'), 'English Fallback');
+  assert.equal(getMessage('onlyChrome'), 'Chrome Fallback');
+  assert.equal(getMessage('missing'), '');
+});
+
+test('ロケールファイル: 全5ロケールのmessages.jsonのキーが一致し空文字やプレースホルダー不備がない', () => {
   const rootDir = path.resolve(import.meta.dirname, '..');
-  const enMessages = JSON.parse(
-    fs.readFileSync(path.join(rootDir, 'package', '_locales', 'en', 'messages.json'), 'utf8')
-  );
-  const jaMessages = JSON.parse(
-    fs.readFileSync(path.join(rootDir, 'package', '_locales', 'ja', 'messages.json'), 'utf8')
+  const catalogs = Object.fromEntries(
+    SUPPORTED_LOCALES.map((locale) => [
+      locale,
+      JSON.parse(
+        fs.readFileSync(path.join(rootDir, 'package', '_locales', locale, 'messages.json'), 'utf8')
+      )
+    ])
   );
 
-  const enKeys = Object.keys(enMessages).sort();
-  const jaKeys = Object.keys(jaMessages).sort();
-  assert.deepEqual(enKeys, jaKeys);
+  const baseKeys = Object.keys(catalogs.en).sort();
+  assert.ok(baseKeys.includes('commandSmartCopyDesc'));
+  assert.ok(baseKeys.includes('optionLanguage'));
+  assert.ok(baseKeys.includes('optionLanguageAuto'));
 
-  for (const key of enKeys) {
-    assert.ok(enMessages[key].message.trim().length > 0, `en message for ${key} is empty`);
-    assert.ok(jaMessages[key].message.trim().length > 0, `ja message for ${key} is empty`);
+  for (const locale of SUPPORTED_LOCALES) {
+    const catalog = catalogs[locale];
+    const keys = Object.keys(catalog).sort();
+    assert.deepEqual(keys, baseKeys, `keys mismatch for locale ${locale}`);
+
+    for (const key of baseKeys) {
+      assert.ok(
+        typeof catalog[key]?.message === 'string' && catalog[key].message.trim().length > 0,
+        `${locale} message for ${key} is empty`
+      );
+    }
+
+    // プレースホルダーを含む主要メッセージが正しく展開されることを確認
+    const linkLabel = formatChromeMessage(catalog.contextMenuCopyLinkAsFormat, ['Markdown']);
+    assert.ok(linkLabel.includes('Markdown'), `${locale} link format placeholder failed: ${linkLabel}`);
+    assert.ok(!linkLabel.includes('$FORMAT$'), `${locale} unresolved $FORMAT$ in link label`);
+
+    const pageLabel = formatChromeMessage(catalog.contextMenuCopyPageAsFormat, ['Slack']);
+    assert.ok(pageLabel.includes('Slack'), `${locale} page format placeholder failed: ${pageLabel}`);
+    assert.ok(!pageLabel.includes('$FORMAT$'), `${locale} unresolved $FORMAT$ in page label`);
+
+    // $$ エスケープが正しく展開されることを確認
+    const varsHelp = formatChromeMessage(catalog.optionsVariablesHelp);
+    assert.ok(varsHelp.includes('${title}'), `${locale} optionsVariablesHelp missing \${title}`);
+    assert.ok(varsHelp.includes('${url}'), `${locale} optionsVariablesHelp missing \${url}`);
+    assert.ok(!varsHelp.includes('$${'), `${locale} optionsVariablesHelp still contains escaped $$`);
   }
 });
 
@@ -157,6 +291,7 @@ test('HTMLファイルとビルド成果物: popup.html/options.htmlおよびバ
   assert.match(popupHtml, /\.menu-section\[hidden\]/);
   assert.doesNotMatch(popupHtml, /other-formats-heading/);
   assert.match(optionsHtml, /src="js\/options\.js"/);
+  assert.match(optionsHtml, /id="language-select"/);
   assert.ok(fs.existsSync(path.join(rootDir, 'package', 'js', 'popup.js')));
   assert.ok(fs.existsSync(path.join(rootDir, 'package', 'js', 'options.js')));
   assert.ok(fs.existsSync(path.join(rootDir, 'package', 'js', 'background.js')));
