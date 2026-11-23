@@ -1,6 +1,8 @@
 /**
  * Chrome ウェブストア用スクリーンショット（4 枚構成）の HTML/CSS テンプレートを生成するモジュール。
- * 1280x800 を基準キャンバスとして設計し、640x400 指定時は CSS transform で崩れなく 0.5 倍スケーリングします。
+ * 1280x800 を基準キャンバスとして設計し、Chrome ウェブストアの縮小表示でも判読しやすい
+ * 大きめのタイポグラフィとシンプルなモックアップ構成を採用しています。
+ * 640x400 指定時は CSS transform で崩れなく 0.5 倍スケーリングします。
  * すべてのアイコン・図形はインライン SVG で完結し、外部ネットワークには一切依存しません。
  */
 
@@ -22,6 +24,7 @@ function escapeHtml(value) {
 
 /**
  * テンプレートカードのコード例 HTML（シンタックスハイライト付き）を生成します。
+ * 縮小表示でも一目で構文の違いが分かるよう、短く端的な URL を使用します。
  * @param {'markdown' | 'chat' | 'wiki' | 'html'} codeType - コード記法の種別
  * @param {string} sampleTitle - サンプル表示タイトル
  * @returns {string} コード表示用 HTML
@@ -72,8 +75,8 @@ function buildCommonCss(fontFamily, width, height) {
       transform: scale(${scale});
       transform-origin: top left;
       background:
-        radial-gradient(circle at 78% 22%, rgba(56, 189, 248, 0.14), transparent 44%),
-        radial-gradient(circle at 18% 82%, rgba(30, 64, 175, 0.16), transparent 48%),
+        radial-gradient(circle at 78% 22%, rgba(56, 189, 248, 0.16), transparent 44%),
+        radial-gradient(circle at 18% 82%, rgba(30, 64, 175, 0.18), transparent 48%),
         linear-gradient(160deg, #0b1220 0%, #0f172a 55%, #090f1c 100%);
       color: #f8fafc;
       position: relative;
@@ -88,7 +91,7 @@ function buildCommonCss(fontFamily, width, height) {
       width: 48px;
       height: 48px;
       border-radius: 12px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(148, 163, 184, 0.2);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(148, 163, 184, 0.22);
       overflow: hidden;
       flex-shrink: 0;
       display: flex;
@@ -99,8 +102,8 @@ function buildCommonCss(fontFamily, width, height) {
       display: block;
     }
     .brand-name {
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 26px;
+      font-weight: 800;
       letter-spacing: -0.02em;
       color: #ffffff;
     }
@@ -108,15 +111,16 @@ function buildCommonCss(fontFamily, width, height) {
       color: #38bdf8;
     }
     .subcopy {
-      font-size: 20px;
-      line-height: 1.6;
-      color: #94a3b8;
+      font-size: 24px;
+      line-height: 1.5;
+      color: #cbd5e1;
+      font-weight: 500;
       overflow-wrap: break-word;
     }
     .mini-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
       overflow: hidden;
       flex-shrink: 0;
       display: inline-flex;
@@ -127,7 +131,7 @@ function buildCommonCss(fontFamily, width, height) {
       display: block;
     }
     .tk-punc { color: #94a3b8; }
-    .tk-title { color: #38bdf8; font-weight: 600; }
+    .tk-title { color: #38bdf8; font-weight: 700; }
     .tk-url { color: #a5b4fc; }
     .tk-tag { color: #f472b6; }
     .tk-attr { color: #4ade80; }
@@ -139,7 +143,7 @@ function buildCommonCss(fontFamily, width, height) {
 }
 
 /**
- * スライド 01: ヒーロー（右クリック＆ショートカットで即コピー）の HTML を生成します。
+ * スライド 01: ヒーロー（右クリックで Markdown リンクを作成）の HTML を生成します。
  * @param {object} data - 対象言語のスライドデータ
  * @param {string} iconSvg - インライン SVG 文字列
  * @returns {{ css: string, body: string }} スライド 01 固有の CSS と HTML
@@ -148,68 +152,80 @@ function renderSlide01(data, iconSvg) {
   const s = data.slide01;
   const isEn = data.htmlLang === 'en';
   const isJa = data.htmlLang === 'ja';
+  const headlineSize = isEn ? '56px' : isJa ? '43px' : '54px';
   const css = `
     .slide01 {
       display: grid;
-      grid-template-columns: 524px 1fr;
+      grid-template-columns: 530px 1fr;
       gap: 40px;
       align-items: center;
-      padding: 64px 68px;
+      padding: 58px 60px;
       height: 100%;
     }
     .s1-left {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 26px;
+    }
+    .s1-brand-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+    }
+    .s1-brand-name {
+      font-size: 28px;
     }
     .s1-headline {
-      font-size: ${isEn ? '50px' : isJa ? '44px' : '46px'};
+      font-size: ${headlineSize};
       font-weight: 800;
-      line-height: ${isEn ? '1.14' : '1.26'};
+      line-height: ${isEn ? '1.14' : '1.25'};
       letter-spacing: -0.025em;
       color: #ffffff;
     }
-    .s1-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 8px;
-    }
-    .shortcut-row {
+    .s1-badges {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 14px;
       flex-wrap: wrap;
-      font-size: 15px;
-      color: #94a3b8;
+      margin-top: 6px;
+    }
+    .shortcut-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      color: #e2e8f0;
+      font-size: 16px;
+      font-weight: 700;
     }
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 28px;
-      height: 28px;
-      padding: 0 9px;
+      min-width: 30px;
+      height: 30px;
+      padding: 0 8px;
       border-radius: 6px;
-      background: #1e293b;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      color: #e2e8f0;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 2px 0 rgba(2, 6, 23, 0.6);
+      background: #0f172a;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #f8fafc;
+      font-size: 15px;
+      font-weight: 700;
     }
     .lang-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      align-self: flex-start;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 10px 18px;
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.38);
       color: #7dd3fc;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 17px;
+      font-weight: 700;
     }
     .s1-right {
       display: flex;
@@ -218,29 +234,29 @@ function renderSlide01(data, iconSvg) {
     }
     .browser-win {
       background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.1);
       position: relative;
       color: #0f172a;
-      height: 356px;
+      height: 392px;
     }
     .browser-bar {
-      height: 48px;
+      height: 52px;
       background: #f1f5f9;
       border-bottom: 1px solid #e2e8f0;
-      border-radius: 16px 16px 0 0;
+      border-radius: 18px 18px 0 0;
       display: flex;
       align-items: center;
-      padding: 0 18px;
-      gap: 14px;
+      padding: 0 20px;
+      gap: 16px;
     }
     .dots {
       display: flex;
       gap: 8px;
     }
     .dot {
-      width: 11px;
-      height: 11px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
     }
     .dot-r { background: #f87171; }
@@ -248,92 +264,92 @@ function renderSlide01(data, iconSvg) {
     .dot-g { background: #4ade80; }
     .url-bar {
       flex: 1;
-      height: 30px;
+      height: 34px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
-      padding: 0 12px;
-      font-size: 13px;
+      padding: 0 14px;
+      font-size: 15px;
+      font-weight: 500;
       color: #64748b;
     }
     .browser-body {
-      padding: 28px 32px;
+      padding: 28px 34px;
     }
     .page-h {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 800;
       color: #0f172a;
       margin-bottom: 16px;
     }
     .page-p {
-      font-size: 17px;
-      line-height: 1.7;
+      font-size: 21px;
+      line-height: 1.65;
       color: #334155;
+      font-weight: 500;
     }
     .page-link {
       color: #0369a1;
       background: #e0f2fe;
-      border-bottom: 2px solid #0284c7;
-      padding: 2px 8px;
-      border-radius: 5px;
-      font-weight: 700;
+      border-bottom: 3px solid #0284c7;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 800;
     }
     .ctx-menu {
       position: absolute;
-      right: 26px;
-      top: 150px;
-      width: 344px;
+      right: 24px;
+      top: 166px;
+      width: 440px;
       background: #ffffff;
-      border-radius: 12px;
-      padding: 8px;
-      box-shadow: 0 22px 46px rgba(2, 6, 23, 0.32), 0 0 0 1px rgba(15, 23, 42, 0.1);
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 24px 52px rgba(2, 6, 23, 0.36), 0 0 0 1px rgba(15, 23, 42, 0.12);
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 5px;
       z-index: 2;
     }
     .ctx-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 8px;
-      font-size: 13.5px;
-      font-weight: 500;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 600;
       color: #1e293b;
       position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .ctx-item.active {
       background: linear-gradient(90deg, #0b6cf5 0%, #2563eb 100%);
       color: #ffffff;
-      font-weight: 600;
+      font-weight: 700;
     }
     .ctx-sep {
       height: 1px;
       background: #e2e8f0;
-      margin: 4px 6px;
-    }
-    .ctx-arrow {
-      margin-left: auto;
-      font-size: 10px;
-      color: #94a3b8;
+      margin: 4px 8px;
     }
     .cursor-svg {
       position: absolute;
       right: 16px;
-      top: 18px;
-      width: 24px;
-      height: 24px;
-      filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
+      top: 22px;
+      width: 28px;
+      height: 28px;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.38));
     }
     .result-card {
-      background: rgba(15, 23, 42, 0.88);
-      border: 1px solid rgba(148, 163, 184, 0.24);
-      border-radius: 16px;
-      padding: 22px 26px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 18px;
+      padding: 24px 28px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
     }
     .result-top {
       display: flex;
@@ -342,8 +358,8 @@ function renderSlide01(data, iconSvg) {
       margin-bottom: 14px;
     }
     .result-label {
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 800;
       letter-spacing: 0.12em;
       color: #94a3b8;
     }
@@ -351,40 +367,46 @@ function renderSlide01(data, iconSvg) {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 14px;
+      padding: 6px 16px;
       border-radius: 999px;
-      background: rgba(16, 185, 129, 0.14);
-      border: 1px solid rgba(52, 211, 153, 0.4);
+      background: rgba(16, 185, 129, 0.16);
+      border: 1px solid rgba(52, 211, 153, 0.45);
       color: #34d399;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 800;
     }
     .result-code {
-      font-size: 18px;
-      line-height: 1.5;
+      font-size: 22px;
+      line-height: 1.45;
       color: #e2e8f0;
-      word-break: break-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   `;
+
+  const line1Html = s.headlineLine1Accent
+    ? `${escapeHtml(s.headlineLine1)}<span class="accent">${escapeHtml(s.headlineLine1Accent)}</span>`
+    : escapeHtml(s.headlineLine1);
+  const line2Html = s.headlineLine2Accent
+    ? `<span class="accent">${escapeHtml(s.headlineLine2Accent)}</span>${escapeHtml(s.headlineLine2)}`
+    : escapeHtml(s.headlineLine2);
 
   const body = `
     <div class="slide01">
       <div class="s1-left">
         <div class="brand-pill">
-          <div class="brand-icon">${iconSvg}</div>
-          <span class="brand-name">${escapeHtml(data.appName)}</span>
+          <div class="brand-icon s1-brand-icon">${iconSvg}</div>
+          <span class="brand-name s1-brand-name">${escapeHtml(data.appName)}</span>
         </div>
         <h1 class="s1-headline">
-          ${escapeHtml(s.headlineBefore)}<br>
-          <span class="accent">${escapeHtml(s.headlineAccent)}</span> ${escapeHtml(s.headlineAfter)}
+          ${line1Html}<br>
+          ${line2Html}
         </h1>
         <p class="subcopy">${escapeHtml(s.subcopy)}</p>
-        <div class="s1-meta">
-          <div class="shortcut-row">
-            <span>${escapeHtml(s.shortcutLabel)}</span>
+        <div class="s1-badges">
+          <div class="shortcut-pill">
             <span class="kbd">⌘</span><span class="kbd">⇧</span><span class="kbd">M</span>
-            <span>/</span>
-            <span class="kbd">Ctrl</span><span class="kbd">Shift</span><span class="kbd">M</span>
           </div>
           <div class="lang-pill">
             <span>🌐</span>
@@ -421,15 +443,10 @@ function renderSlide01(data, iconSvg) {
               <span class="mini-icon">${iconSvg}</span>
               <span>${escapeHtml(s.menuItem2)}</span>
             </div>
-            <div class="ctx-item">
-              <span class="mini-icon">${iconSvg}</span>
-              <span>${escapeHtml(s.menuItem3)}</span>
-              <span class="ctx-arrow">▶</span>
-            </div>
             <div class="ctx-sep"></div>
             <div class="ctx-item">
               <span class="mini-icon">${iconSvg}</span>
-              <span>${escapeHtml(s.menuItem4)}</span>
+              <span>${escapeHtml(s.menuItem3)}</span>
             </div>
           </div>
         </div>
@@ -440,7 +457,7 @@ function renderSlide01(data, iconSvg) {
             <span class="copied-pill">✓ ${escapeHtml(s.copiedBadge)}</span>
           </div>
           <div class="result-code mono">
-            <span class="tk-punc">[</span><span class="tk-title">${escapeHtml(s.resultLinkText)}</span><span class="tk-punc">](</span><span class="tk-url">https://example.com/guide</span><span class="tk-punc">)</span>
+            <span class="tk-punc">[</span><span class="tk-title">${escapeHtml(s.resultLinkText)}</span><span class="tk-punc">](</span><span class="tk-url">https://example.com</span><span class="tk-punc">)</span>
           </div>
         </div>
       </div>
@@ -458,13 +475,12 @@ function renderSlide01(data, iconSvg) {
  */
 function renderSlide02(data, iconSvg) {
   const s = data.slide02;
-  const isEn = data.htmlLang === 'en';
   const css = `
     .slide02 {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 52px 72px 60px;
+      padding: 46px 64px 54px;
       height: 100%;
     }
     .s2-header {
@@ -472,26 +488,26 @@ function renderSlide02(data, iconSvg) {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 42px;
-      max-width: 1040px;
+      gap: 12px;
+      margin-bottom: 34px;
+      max-width: 1100px;
     }
     .s2-headline {
-      font-size: ${isEn ? '44px' : '46px'};
+      font-size: 54px;
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.18;
       letter-spacing: -0.025em;
     }
     .s2-grid {
       width: 100%;
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 84px 1fr;
+      grid-template-columns: 1fr 92px 1fr;
       align-items: stretch;
       gap: 12px;
     }
     .panel {
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -500,21 +516,21 @@ function renderSlide02(data, iconSvg) {
     .panel-light {
       background: #ffffff;
       color: #0f172a;
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.16);
     }
     .panel-dark {
       background: #0f1a2d;
       color: #e2e8f0;
-      border: 1px solid rgba(148, 163, 184, 0.25);
+      border: 1px solid rgba(56, 189, 248, 0.32);
     }
     .panel-head {
-      height: 54px;
-      padding: 0 24px;
+      height: 58px;
+      padding: 0 26px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 19px;
+      font-weight: 800;
     }
     .panel-light .panel-head {
       background: #f8fafc;
@@ -523,11 +539,11 @@ function renderSlide02(data, iconSvg) {
     }
     .panel-dark .panel-head {
       background: #132138;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.22);
       color: #7dd3fc;
     }
     .panel-badge {
-      font-size: 13px;
+      font-size: 16px;
       font-weight: 800;
       letter-spacing: 0.04em;
       color: #0284c7;
@@ -537,28 +553,28 @@ function renderSlide02(data, iconSvg) {
     }
     .panel-body {
       flex: 1;
-      padding: 26px 24px;
+      padding: 26px 28px;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
     .selection-box {
       background: #e0f2fe;
-      border-left: 4px solid #0284c7;
-      border-radius: 10px;
-      padding: 24px 24px 22px;
+      border-left: 5px solid #0284c7;
+      border-radius: 12px;
+      padding: 26px 28px;
     }
     .sel-h2 {
-      font-size: 22px;
+      font-size: 28px;
       font-weight: 800;
       color: #0f172a;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .sel-ul {
       list-style: disc;
-      padding-left: 20px;
-      margin-bottom: 18px;
-      font-size: 15px;
+      padding-left: 24px;
+      margin-bottom: 22px;
+      font-size: 20px;
       line-height: 1.75;
       color: #1e293b;
     }
@@ -566,19 +582,19 @@ function renderSlide02(data, iconSvg) {
       width: 100%;
       border-collapse: collapse;
       background: #ffffff;
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
-      font-size: 14px;
+      font-size: 19px;
       border: 1px solid #cbd5e1;
     }
     .sel-table th, .sel-table td {
-      padding: 10px 14px;
+      padding: 12px 16px;
       text-align: left;
       border-bottom: 1px solid #e2e8f0;
     }
     .sel-table th {
       background: #eef2f7;
-      font-weight: 700;
+      font-weight: 800;
       color: #334155;
     }
     .sel-table tr:last-child td {
@@ -589,38 +605,38 @@ function renderSlide02(data, iconSvg) {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 14px;
     }
     .arrow-circle {
-      width: 58px;
-      height: 58px;
+      width: 66px;
+      height: 66px;
       border-radius: 50%;
       background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 800;
-      box-shadow: 0 12px 28px rgba(14, 165, 233, 0.4);
+      box-shadow: 0 12px 28px rgba(14, 165, 233, 0.45);
     }
     .arrow-kbd {
-      padding: 5px 10px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
       background: #1e293b;
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      color: #cbd5e1;
-      font-size: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      color: #e2e8f0;
+      font-size: 15px;
       font-weight: 700;
     }
     .md-pre {
-      font-size: 13.5px;
-      line-height: 1.9;
+      font-size: 19px;
+      line-height: 1.85;
       white-space: pre-wrap;
-      color: #cbd5e1;
+      color: #e2e8f0;
     }
-    .md-h { color: #38bdf8; font-weight: 700; }
-    .md-b { color: #f8fafc; font-weight: 700; }
+    .md-h { color: #38bdf8; font-weight: 800; }
+    .md-b { color: #ffffff; font-weight: 800; }
     .md-pipe { color: #64748b; }
   `;
 
@@ -709,13 +725,12 @@ function renderSlide02(data, iconSvg) {
  */
 function renderSlide03(data, iconSvg) {
   const s = data.slide03;
-  const isEn = data.htmlLang === 'en';
   const css = `
     .slide03 {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 52px 72px 54px;
+      padding: 46px 64px 50px;
       height: 100%;
     }
     .s3-header {
@@ -723,14 +738,14 @@ function renderSlide03(data, iconSvg) {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 42px;
-      max-width: 1040px;
+      gap: 12px;
+      margin-bottom: 36px;
+      max-width: 1100px;
     }
     .s3-headline {
-      font-size: ${isEn ? '46px' : '46px'};
+      font-size: 54px;
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.18;
       letter-spacing: -0.025em;
     }
     .s3-grid {
@@ -738,64 +753,55 @@ function renderSlide03(data, iconSvg) {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
-      margin-bottom: 34px;
+      margin-bottom: 32px;
     }
     .fmt-card {
-      background: rgba(17, 28, 45, 0.92);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      border-radius: 18px;
-      padding: 26px 28px;
+      background: rgba(17, 28, 45, 0.94);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 20px;
+      padding: 28px 30px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      gap: 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.36);
     }
     .fmt-card.active {
-      border-color: rgba(56, 189, 248, 0.72);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.28), 0 20px 44px rgba(2, 132, 199, 0.22);
+      border-color: rgba(56, 189, 248, 0.78);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.32), 0 20px 44px rgba(2, 132, 199, 0.24);
     }
     .fmt-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-    }
-    .fmt-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      gap: 14px;
     }
     .fmt-title {
-      font-size: 22px;
+      font-size: 28px;
       font-weight: 800;
       color: #ffffff;
     }
     .mime-tag {
-      padding: 3px 9px;
-      border-radius: 6px;
-      font-size: 11.5px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 15px;
       font-weight: 700;
       background: rgba(148, 163, 184, 0.14);
-      color: #94a3b8;
-      border: 1px solid rgba(148, 163, 184, 0.22);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.26);
+      white-space: nowrap;
     }
     .mime-tag.is-html {
-      background: rgba(244, 114, 182, 0.14);
-      color: #f9a8d4;
-      border-color: rgba(244, 114, 182, 0.35);
-    }
-    .fmt-badge {
-      font-size: 13.5px;
-      color: #94a3b8;
-      text-align: right;
+      background: rgba(244, 114, 182, 0.18);
+      color: #fbcfe8;
+      border-color: rgba(244, 114, 182, 0.45);
     }
     .fmt-code {
       background: #0a1120;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 12px;
-      padding: 18px 20px;
-      font-size: 15.5px;
-      line-height: 1.5;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 14px;
+      padding: 20px 22px;
+      font-size: 19px;
+      line-height: 1.45;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -804,23 +810,23 @@ function renderSlide03(data, iconSvg) {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 14px;
       flex-wrap: wrap;
       margin-top: auto;
     }
     .vars-label {
-      font-size: 15px;
-      font-weight: 600;
-      color: #94a3b8;
+      font-size: 19px;
+      font-weight: 700;
+      color: #cbd5e1;
     }
     .var-chip {
-      padding: 7px 15px;
+      padding: 8px 18px;
       border-radius: 999px;
-      background: rgba(14, 165, 233, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(14, 165, 233, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.4);
       color: #7dd3fc;
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 700;
     }
   `;
 
@@ -829,11 +835,8 @@ function renderSlide03(data, iconSvg) {
       (card) => `
       <div class="fmt-card ${card.active ? 'active' : ''}">
         <div class="fmt-top">
-          <div class="fmt-title-wrap">
-            <span class="fmt-title">${escapeHtml(card.title)}</span>
-            <span class="mime-tag mono ${card.mime === 'text/html' ? 'is-html' : ''}">${escapeHtml(card.mime)}</span>
-          </div>
-          <span class="fmt-badge">${escapeHtml(card.badge)}</span>
+          <span class="fmt-title">${escapeHtml(card.title)}</span>
+          <span class="mime-tag ${card.isHtml ? 'is-html' : 'mono'}">${escapeHtml(card.tag)}</span>
         </div>
         <div class="fmt-code mono">${renderFormatCode(card.codeType, card.sampleTitle)}</div>
       </div>`
@@ -877,13 +880,12 @@ function renderSlide03(data, iconSvg) {
  */
 function renderSlide04(data, iconSvg) {
   const s = data.slide04;
-  const isEn = data.htmlLang === 'en';
   const css = `
     .slide04 {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 46px 64px 52px;
+      padding: 46px 60px 52px;
       height: 100%;
     }
     .s4-header {
@@ -893,209 +895,207 @@ function renderSlide04(data, iconSvg) {
       align-items: center;
       gap: 12px;
       margin-bottom: 34px;
-      max-width: 1060px;
+      max-width: 1120px;
     }
     .s4-headline {
-      font-size: ${isEn ? '44px' : '44px'};
+      font-size: 54px;
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.18;
       letter-spacing: -0.025em;
     }
     .s4-stage {
       width: 100%;
       flex: 1;
       display: grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 440px 1fr;
       gap: 32px;
-      align-items: start;
+      align-items: stretch;
     }
     .mock-col {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .mock-caption {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
       color: #7dd3fc;
-      padding-left: 4px;
+      padding-left: 6px;
     }
-    /* ツールバーポップアップの実 UI 忠実モック */
+    /* ツールバーポップアップのシンプル・高視認性モック */
     .popup-mock {
+      flex: 1;
       background: #ffffff;
       color: #24292f;
-      border-radius: 14px;
-      padding: 10px 0 12px;
-      box-shadow: 0 24px 54px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.14);
+      border-radius: 18px;
+      padding: 14px 0 18px;
+      box-shadow: 0 24px 54px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.16);
+      display: flex;
+      flex-direction: column;
     }
     .pop-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 16px 12px;
+      padding: 8px 20px 16px;
       border-bottom: 1px solid #eaeef2;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
     }
     .pop-brand {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 700;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
       color: #1f2328;
     }
     .pop-opt-btn {
       background: #f6f8fa;
-      border: 1px solid #d0d7de;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 15px;
+      font-weight: 700;
       color: #24292f;
     }
     .pop-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #24292f;
+      padding: 14px 20px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .pop-item.hover {
-      background: #f0f6ff;
+      background: #e8f2ff;
       color: #0969da;
-      font-weight: 600;
-    }
-    .pop-sub-box {
-      background: #f8fafc;
-      border-top: 1px solid #f0f2f5;
-      border-bottom: 1px solid #f0f2f5;
-    }
-    .pop-sub-item {
-      padding: 8px 16px 8px 32px;
-      font-size: 13px;
-      color: #334155;
+      font-weight: 700;
     }
     .pop-div {
       height: 1px;
       background: #eaeef2;
-      margin: 6px 0;
+      margin: 8px 0;
     }
     .pop-status {
-      margin: 10px 14px 2px;
-      padding: 10px 12px;
-      border-radius: 8px;
+      margin: auto 18px 2px;
+      padding: 14px 16px;
+      border-radius: 10px;
       background: #dafbe1;
       color: #116329;
-      border: 1px solid #4ac26b;
-      font-size: 14px;
-      font-weight: 700;
+      border: 1.5px solid #4ac26b;
+      font-size: 18px;
+      font-weight: 800;
       text-align: center;
     }
-    /* オプション画面（タブ表示）の実 UI 忠実モック */
+    /* オプション画面（タブ表示）のシンプル・高視認性モック */
     .options-mock {
+      flex: 1;
       background: #ffffff;
       color: #24292f;
-      border-radius: 14px;
+      border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 24px 54px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.14);
+      box-shadow: 0 24px 54px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.16);
+      display: flex;
+      flex-direction: column;
     }
     .opt-chrome {
-      height: 40px;
+      height: 46px;
       background: #f1f5f9;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
       align-items: center;
-      padding: 0 16px;
-      gap: 12px;
+      padding: 0 18px;
+      gap: 14px;
     }
     .opt-tab {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-bottom: none;
-      border-radius: 8px 8px 0 0;
-      padding: 6px 14px;
-      margin-top: 8px;
-      font-size: 12px;
-      font-weight: 600;
+      border-radius: 9px 9px 0 0;
+      padding: 7px 16px;
+      margin-top: 9px;
+      font-size: 15px;
+      font-weight: 700;
       color: #334155;
     }
     .opt-body {
-      padding: 20px 24px 22px;
+      flex: 1;
+      padding: 22px 26px 24px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
     .opt-controls {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      flex-wrap: wrap;
-      padding-bottom: 14px;
+      padding-bottom: 18px;
       border-bottom: 1px solid #eaeef2;
     }
     .opt-control-group {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13.5px;
+      gap: 10px;
+      font-size: 17px;
       color: #334155;
-      font-weight: 600;
+      font-weight: 700;
     }
     .opt-select {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 5px 12px;
-      border-radius: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
       border: 1px solid #cbd5e1;
       background: #f8fafc;
       color: #0f172a;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: 700;
     }
     .opt-check {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
       background: #0366d6;
       color: #ffffff;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 14px;
       font-weight: 800;
       line-height: 1;
       flex-shrink: 0;
     }
     .opt-check.off {
       background: #ffffff;
-      border: 1.5px solid #cbd5e1;
+      border: 2px solid #cbd5e1;
       color: transparent;
     }
     .opt-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 17px;
     }
     .opt-table th {
       background: #f7f8fa;
       color: #475569;
-      font-weight: 700;
-      padding: 9px 10px;
+      font-weight: 800;
+      padding: 12px 12px;
       text-align: left;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1.5px solid #e2e8f0;
       white-space: nowrap;
     }
     .opt-table td {
-      padding: 10px 10px;
+      padding: 16px 12px;
       border-bottom: 1px solid #f1f5f9;
       color: #1e293b;
       vertical-align: middle;
@@ -1104,46 +1104,38 @@ function renderSlide04(data, iconSvg) {
       border-bottom: none;
     }
     .opt-table tr.is-pinned {
-      background: #f8fbff;
+      background: #f5f9ff;
     }
-    .order-cell {
+    .pin-cell {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      color: #64748b;
+      gap: 10px;
     }
     .drag-dots {
+      color: #94a3b8;
+      font-size: 18px;
       font-weight: 800;
-      letter-spacing: -1px;
-      margin-right: 2px;
+      letter-spacing: -2px;
     }
-    .move-btn {
+    .name-cell {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      font-size: 11px;
-      color: #334155;
+      gap: 8px;
+      font-weight: 700;
+      white-space: nowrap;
     }
-    .fmt-cell {
-      color: #475569;
-      font-size: 12px;
-    }
-    .mime-pill {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 4px;
-      background: #f1f5f9;
-      color: #475569;
-      font-size: 11.5px;
-    }
-    .mime-pill.html {
+    .html-badge {
+      padding: 2px 8px;
+      border-radius: 5px;
       background: #fce7f3;
       color: #be185d;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .fmt-cell {
+      color: #334155;
+      font-size: 16px;
+      white-space: nowrap;
     }
   `;
 
@@ -1175,11 +1167,7 @@ function renderSlide04(data, iconSvg) {
             <div class="pop-item">${escapeHtml(s.popupPinned2)}</div>
             <div class="pop-item">
               <span>${escapeHtml(s.popupOther)}</span>
-              <span style="font-size: 10px; color: #64748b;">▼</span>
-            </div>
-            <div class="pop-sub-box">
-              <div class="pop-sub-item">${escapeHtml(s.popupSub1)}</div>
-              <div class="pop-sub-item">${escapeHtml(s.popupSub2)}</div>
+              <span style="font-size: 13px; color: #64748b;">▸</span>
             </div>
             <div class="pop-div"></div>
             <div class="pop-item">${escapeHtml(s.popupSelection)}</div>
@@ -1191,10 +1179,10 @@ function renderSlide04(data, iconSvg) {
           <div class="mock-caption">${escapeHtml(s.optionsCaption)}</div>
           <div class="options-mock">
             <div class="opt-chrome">
-              <div class="dots" style="display:flex;gap:6px;">
-                <span style="width:10px;height:10px;border-radius:50%;background:#f87171;"></span>
-                <span style="width:10px;height:10px;border-radius:50%;background:#facc15;"></span>
-                <span style="width:10px;height:10px;border-radius:50%;background:#4ade80;"></span>
+              <div class="dots" style="display:flex;gap:7px;">
+                <span style="width:11px;height:11px;border-radius:50%;background:#f87171;"></span>
+                <span style="width:11px;height:11px;border-radius:50%;background:#facc15;"></span>
+                <span style="width:11px;height:11px;border-radius:50%;background:#4ade80;"></span>
               </div>
               <div class="opt-tab">
                 <span class="mini-icon">${iconSvg}</span>
@@ -1205,52 +1193,37 @@ function renderSlide04(data, iconSvg) {
               <div class="opt-controls">
                 <div class="opt-control-group">
                   <span>${escapeHtml(s.optLangLabel)}</span>
-                  <span class="opt-select">${escapeHtml(s.optLangValue)} <span style="font-size:10px;color:#64748b;">▾</span></span>
+                  <span class="opt-select">${escapeHtml(s.optLangValue)} <span style="font-size:12px;color:#64748b;">▾</span></span>
                 </div>
                 <div class="opt-control-group">
                   <span class="opt-check">✓</span>
                   <span>${escapeHtml(s.optFaviconLabel)}</span>
-                  <span class="opt-select" style="padding:3px 9px;font-size:12px;">16px ▾</span>
+                  <span class="opt-select">16px <span style="font-size:12px;color:#64748b;">▾</span></span>
                 </div>
               </div>
 
               <table class="opt-table">
                 <thead>
                   <tr>
-                    <th>${escapeHtml(s.optThOrder)}</th>
-                    <th style="text-align:center;">${escapeHtml(s.optThPin)}</th>
+                    <th>${escapeHtml(s.optThPin)}</th>
                     <th>${escapeHtml(s.optThName)}</th>
-                    <th>${escapeHtml(s.optThMime)}</th>
                     <th>${escapeHtml(s.optThFormat)}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr class="is-pinned">
-                    <td><span class="order-cell"><span class="drag-dots">⋮⋮</span><span class="move-btn" style="opacity:0.4;">↑</span><span class="move-btn">↓</span></span></td>
-                    <td style="text-align:center;"><span class="opt-check">✓</span></td>
-                    <td><strong>${escapeHtml(s.optRow1Name)}</strong></td>
-                    <td><span class="mime-pill mono">text/plain</span></td>
+                    <td><span class="pin-cell"><span class="drag-dots">⋮⋮</span><span class="opt-check">✓</span></span></td>
+                    <td><span class="name-cell">${escapeHtml(s.optRow1Name)}</span></td>
                     <td class="fmt-cell mono">[\${title}](\${url})</td>
                   </tr>
                   <tr class="is-pinned">
-                    <td><span class="order-cell"><span class="drag-dots">⋮⋮</span><span class="move-btn">↑</span><span class="move-btn">↓</span></span></td>
-                    <td style="text-align:center;"><span class="opt-check">✓</span></td>
-                    <td><strong>${escapeHtml(s.optRow2Name)}</strong></td>
-                    <td><span class="mime-pill html mono">text/html</span></td>
+                    <td><span class="pin-cell"><span class="drag-dots">⋮⋮</span><span class="opt-check">✓</span></span></td>
+                    <td><span class="name-cell">${escapeHtml(s.optRow2Name)} <span class="html-badge mono">text/html</span></span></td>
                     <td class="fmt-cell mono">&lt;a href="\${url}"&gt;\${title}&lt;/a&gt;</td>
                   </tr>
                   <tr>
-                    <td><span class="order-cell"><span class="drag-dots">⋮⋮</span><span class="move-btn">↑</span><span class="move-btn">↓</span></span></td>
-                    <td style="text-align:center;"><span class="opt-check off">✓</span></td>
-                    <td>${escapeHtml(s.optRow3Name)}</td>
-                    <td><span class="mime-pill mono">text/plain</span></td>
-                    <td class="fmt-cell mono">&lt;\${url}|\${title}&gt;</td>
-                  </tr>
-                  <tr>
-                    <td><span class="order-cell"><span class="drag-dots">⋮⋮</span><span class="move-btn">↑</span><span class="move-btn" style="opacity:0.4;">↓</span></span></td>
-                    <td style="text-align:center;"><span class="opt-check off">✓</span></td>
-                    <td>${escapeHtml(s.optRow4Name)}</td>
-                    <td><span class="mime-pill mono">text/plain</span></td>
+                    <td><span class="pin-cell"><span class="drag-dots">⋮⋮</span><span class="opt-check off">✓</span></span></td>
+                    <td><span class="name-cell">${escapeHtml(s.optRow3Name)}</span></td>
                     <td class="fmt-cell mono">[\${title}](\${url}) (\${date})</td>
                   </tr>
                 </tbody>
