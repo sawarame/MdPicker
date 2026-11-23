@@ -45,7 +45,7 @@
         "default": "Ctrl+Shift+M",
         "mac": "Command+Shift+M"
       },
-      "description": "Copy selection or page as Markdown"
+      "description": "__MSG_commandSmartCopyDesc__"
     }
   },
   "icons": {

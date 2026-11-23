@@ -1,0 +1,178 @@
+{
+  "appName": {
+    "message": "MdPicker - Markdown 링크 복사 도구",
+    "description": "拡張機能の名前。"
+  },
+  "appDesc": {
+    "message": "우클릭으로 링크, 선택한 텍스트 또는 페이지 정보를 Markdown 형식으로 복사합니다. 페이지 링크에 파비콘(favicon) 추가 및 크기 사용자 지정도 지원합니다.",
+    "description": "拡張機能の説明。"
+  },
+  "contextMenuTitle": {
+    "message": "링크를 Markdown으로 복사",
+    "description": "コンテキストメニューの項目名。"
+  },
+  "contextMenuSelection": {
+    "message": "선택 영역을 Markdown으로 복사",
+    "description": "選択テキスト用コンテキストメニューの項目名。"
+  },
+  "contextMenuPage": {
+    "message": "현재 페이지를 Markdown 링크로 복사",
+    "description": "ページ全体用コンテキストメニューの項目名。"
+  },
+  "contextMenuCopyLinkAs": {
+    "message": "링크를 다른 형식으로 복사...",
+    "description": "リンクを別形式でコピーする親コンテキストメニューの項目名。"
+  },
+  "contextMenuCopyPageAs": {
+    "message": "페이지를 다른 형식으로 복사...",
+    "description": "ページを別形式でコピーする親コンテキストメニューの項目名。"
+  },
+  "optionIncludeFavicon": {
+    "message": "페이지 링크에 파비콘(favicon) 포함",
+    "description": "オプション画面：faviconを含めるかどうかのラベル。"
+  },
+  "optionsSaved": {
+    "message": "설정이 저장되었습니다",
+    "description": "オプション画面：保存完了メッセージ。"
+  },
+  "optionFaviconSize": {
+    "message": "크기:",
+    "description": "オプション画面：faviconサイズのラベル。"
+  },
+  "optionsTemplatesTitle": {
+    "message": "형식 템플릿",
+    "description": "オプション画面：テンプレート設定セクションの見出し。"
+  },
+  "optionsTemplatesDesc": {
+    "message": "우클릭 메뉴의 '링크/페이지를 다른 형식으로 복사'와 단축키에서 사용할 형식을 관리합니다.",
+    "description": "オプション画面：テンプレート設定の説明。"
+  },
+  "optionsShortcutTemplate": {
+    "message": "기본 형식:",
+    "description": "オプション画面：デフォルトテンプレート設定ラベル。"
+  },
+  "optionsResetTemplates": {
+    "message": "기본 템플릿으로 초기화",
+    "description": "オプション画面：初期設定へのリセットボタン。"
+  },
+  "optionsResetConfirm": {
+    "message": "초기화하려면 다시 클릭하세요",
+    "description": "オプション画面：リセット確認メッセージ。"
+  },
+  "optionsAddTemplate": {
+    "message": "추가",
+    "description": "オプション画面：テンプレート追加ボタン。"
+  },
+  "optionsTemplateNamePlaceholder": {
+    "message": "이름 (예: Notion)",
+    "description": "オプション画面：テンプレート名プレースホルダー。"
+  },
+  "optionsTemplateFormatPlaceholder": {
+    "message": "형식 (예: [$${title}]($${url}))",
+    "description": "オプション画面：テンプレート形式プレースホルダー。"
+  },
+  "optionsVariablesHelp": {
+    "message": "사용 가능한 변수: $${title} (제목 / 링크 텍스트), $${url} (URL), $${date} (날짜: YYYY-MM-DD), $${time} (시간: HH:mm), $${favicon} (파비콘 URL)",
+    "description": "オプション画面：変数ヘルプ。"
+  },
+  "optionsDelete": {
+    "message": "삭제",
+    "description": "オプション画面：削除ボタン。"
+  },
+  "optionsThName": {
+    "message": "이름",
+    "description": "オプション画面：テンプレート一覧の名前列ヘッダー。"
+  },
+  "optionsThMimeType": {
+    "message": "MIME 타입",
+    "description": "オプション画面：テンプレート一覧のMIMEタイプ列ヘッダー。"
+  },
+  "optionsThFormat": {
+    "message": "형식",
+    "description": "オプション画面：テンプレート一覧の形式列ヘッダー。"
+  },
+  "optionsThActions": {
+    "message": "작업",
+    "description": "オプション画面：テンプレート一覧の操作列ヘッダー。"
+  },
+  "optionsThPinned": {
+    "message": "상단 고정",
+    "description": "オプション画面：テンプレート一覧のトップレベル表示（ピン留め）列ヘッダー。"
+  },
+  "optionsThOrder": {
+    "message": "순서",
+    "description": "オプション画面：テンプレート一覧の並び替え列ヘッダー。"
+  },
+  "optionsMoveUp": {
+    "message": "위로 이동",
+    "description": "オプション画面：テンプレートを1つ上に移動するボタンのラベル。"
+  },
+  "optionsMoveDown": {
+    "message": "아래로 이동",
+    "description": "オプション画面：テンプレートを1つ下に移動するボタンのラベル。"
+  },
+  "optionsDragHandle": {
+    "message": "드래그하여 순서 변경",
+    "description": "オプション画面：テンプレート行のドラッグハンドルのラベル。"
+  },
+  "contextMenuCopyLinkAsFormat": {
+    "message": "$FORMAT$ 형식으로 링크 복사",
+    "description": "トップレベルのリンクコピー用コンテキストメニューの項目名。",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuCopyPageAsFormat": {
+    "message": "$FORMAT$ 형식으로 페이지 링크 복사",
+    "description": "トップレベルのページリンク作成用コンテキストメニューの項目名。",
+    "placeholders": {
+      "format": {
+        "content": "$1",
+        "example": "Markdown"
+      }
+    }
+  },
+  "contextMenuOtherFormatsLink": {
+    "message": "다른 형식으로 링크 복사...",
+    "description": "リンク用の未ピン留めテンプレートをまとめるサブメニュー項目名。"
+  },
+  "contextMenuOtherFormatsPage": {
+    "message": "다른 형식으로 페이지 복사...",
+    "description": "ページ用の未ピン留めテンプレートをまとめるサブメニュー項目名。"
+  },
+  "contextMenuOpenOptions": {
+    "message": "옵션 열기",
+    "description": "拡張機能アイコンの右クリックメニューやポップアップからオプション画面（タブ）を開く項目名。"
+  },
+  "popupCopied": {
+    "message": "복사했습니다!",
+    "description": "ポップアップでクリップボードへのコピーが完了した際のフィードバックメッセージ。"
+  },
+  "popupCopyFailed": {
+    "message": "복사에 실패했습니다",
+    "description": "ポップアップでクリップボードへのコピーに失敗した際のエラーメッセージ。"
+  },
+  "popupNoSelection": {
+    "message": "이 페이지에서 선택한 텍스트가 없습니다",
+    "description": "ポップアップで選択範囲コピーが無効な理由を示すツールチップ文言。"
+  },
+  "popupPageUnavailable": {
+    "message": "이 페이지의 정보를 가져올 수 없습니다",
+    "description": "アクティブタブのURL等を取得できない場合のエラー・ツールチップ文言。"
+  },
+  "commandSmartCopyDesc": {
+    "message": "선택 영역 또는 페이지를 Markdown으로 복사",
+    "description": "スマートコピー用キーボードショートカットの説明。"
+  },
+  "optionLanguage": {
+    "message": "표시 언어:",
+    "description": "オプション画面：表示言語設定のラベル。"
+  },
+  "optionLanguageAuto": {
+    "message": "자동(브라우저 언어)",
+    "description": "オプション画面：ブラウザの表示言語に自動追従する選択肢のラベル。"
+  }
+}

@@ -162,5 +162,17 @@
   "popupPageUnavailable": {
     "message": "Cannot access this page's info",
     "description": "Tooltip and status message shown when active tab info is unavailable."
+  },
+  "commandSmartCopyDesc": {
+    "message": "Copy selection or page as Markdown",
+    "description": "Description for the smart-copy keyboard shortcut command."
+  },
+  "optionLanguage": {
+    "message": "Display language:",
+    "description": "Label for display language setting on the options page."
+  },
+  "optionLanguageAuto": {
+    "message": "Auto (Browser language)",
+    "description": "Option label to follow the browser display language automatically."
   }
 }

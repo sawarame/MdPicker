@@ -23,8 +23,9 @@ MdPicker プロジェクトで使用されている主要な技術、ツール�
 - `src/`: 開発用の TypeScript ソースコードおよび元アセットディレクトリ。
   - `background.ts`: Service Worker として動作するバックグラウンドスクリプト（コンテキストメニュー管理、`smart-copy` ショートカット処理、Offscreen Document 起動）。
   - `content.ts`: 全ページに注入される Content Script（Shadow DOM 対応リンクテキスト抽出、選択範囲の相対 URL 絶対化および Turndown 変換）。
+  - `i18n.ts`: 多言語設定正規化、ブラウザ言語からのロケール解決・英語フォールバック、`_locales/*/messages.json` 動的読み込みとプレースホルダー展開。
   - `offscreen.ts`: Offscreen Document 用スクリプト（`ClipboardItem` マルチ MIME 書き込みおよび `copy` イベント / `execCommand` フォールバック）。
-  - `options.ts`: オプション画面（タブ表示）の UI 制御、バリデーション、ストレージ保存、多言語適用。
+  - `options.ts`: オプション画面（タブ表示）の UI 制御、バリデーション、ストレージ保存、多言語適用および即時切り替え。
   - `popup.ts`: ツールバーポップアップ画面のコピーメニュー構築、アクティブタブ選択確認、バックグラウンドへのコピー要求およびフィードバック制御。
   - `template.ts`: `FormatTemplate` / `TemplateContext` 型定義、標準プリセット（`DEFAULT_TEMPLATES`）、ピン留め判定・振り分け（`isTemplatePinned`, `partitionTemplatesByPinned`）、プレースホルダー置換・ページ整形（`renderTemplate`, `formatPageWithTemplate`）。
   - `icon.svg`: アプリアイコンの元 SVG ファイル。
@@ -35,7 +36,7 @@ MdPicker プロジェクトで使用されている主要な技術、ツール�
   - `offscreen.html`: クリップボード操作用の不可視 Offscreen Document HTML。
   - `js/`: Webpack によってビルドされた JavaScript ファイル群（`background.js`, `content.js`, `offscreen.js`, `options.js`, `popup.js`）が出力される（`.gitignore` 対象）。
   - `images/`: `scripts/generate-icons.js` によって生成されたアイコン画像（`icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`）。
-  - `_locales/`: `en` と `ja` の国際化（i18n）用メッセージファイル（`messages.json`）。
+  - `_locales/`: `en`・`ja`・`zh_CN`・`zh_TW`・`ko` の 5 ロケール用国際化（i18n）メッセージファイル（`messages.json`）。
 - `scripts/`: ビルド補助スクリプトディレクトリ。
   - `generate-icons.js`: `src/icon.svg` から `package/images/` 配下に PNG アイコンを生成するスクリプト。
 - `store_description.md`: Chrome ウェブストア掲載用の日英説明文。

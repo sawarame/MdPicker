@@ -3,6 +3,7 @@
  */
 
 import { FormatTemplate, DEFAULT_TEMPLATES, partitionTemplatesByPinned } from './template';
+import { I18nContext, LANGUAGE_STORAGE_KEY, loadI18nContext } from './i18n';
 
 /** バックグラウンド側へのコピー要求メッセージの応答型 */
 interface CopyResponse {
@@ -52,8 +53,12 @@ function setAllCopyButtonsDisabled(disabled: boolean): void {
 /**
  * コピー処理を実行し、完了フィードバック表示後にポップアップを自動で閉じます。
  * @param action - 実行する非同期コピー処理
+ * @param i18n - 適用中の多言語コンテキスト
  */
-async function executeCopyAndClose(action: () => Promise<CopyResponse>): Promise<void> {
+async function executeCopyAndClose(
+  action: () => Promise<CopyResponse>,
+  i18n: I18nContext
+): Promise<void> {
   if (isCopying) return;
   isCopying = true;
   setAllCopyButtonsDisabled(true);
@@ -61,20 +66,20 @@ async function executeCopyAndClose(action: () => Promise<CopyResponse>): Promise
   try {
     const response = await action();
     if (response && response.success) {
-      const copiedMsg = chrome.i18n.getMessage('popupCopied') || 'コピーしました';
+      const copiedMsg = i18n.getMessage('popupCopied') || 'Copied!';
       showStatus(copiedMsg, false);
       window.setTimeout(() => {
         window.close();
       }, AUTO_CLOSE_DELAY_MS);
     } else {
-      const failedMsg = chrome.i18n.getMessage('popupCopyFailed') || 'コピーに失敗しました';
+      const failedMsg = i18n.getMessage('popupCopyFailed') || 'Failed to copy';
       showStatus(failedMsg, true);
       isCopying = false;
       setAllCopyButtonsDisabled(false);
     }
   } catch (err) {
     console.warn('ポップアップからのコピー処理中にエラーが発生しました:', err);
-    const failedMsg = chrome.i18n.getMessage('popupCopyFailed') || 'コピーに失敗しました';
+    const failedMsg = i18n.getMessage('popupCopyFailed') || 'Failed to copy';
     showStatus(failedMsg, true);
     isCopying = false;
     setAllCopyButtonsDisabled(false);
@@ -87,6 +92,7 @@ async function executeCopyAndClose(action: () => Promise<CopyResponse>): Promise
  * @param labelText - ボタンに表示するラベル文字列
  * @param tabId - 対象タブID
  * @param pageAvailable - ページ情報が取得可能かどうか
+ * @param i18n - 適用中の多言語コンテキスト
  * @param isSubItem - サブメニュー配下の項目かどうか
  * @returns 生成されたボタン要素
  */
@@ -95,6 +101,7 @@ function createPageCopyButton(
   labelText: string,
   tabId: number | undefined,
   pageAvailable: boolean,
+  i18n: I18nContext,
   isSubItem: boolean = false
 ): HTMLButtonElement {
   const btn = document.createElement('button');
@@ -105,17 +112,19 @@ function createPageCopyButton(
   if (!pageAvailable) {
     btn.disabled = true;
     btn.dataset.initiallyDisabled = 'true';
-    btn.title = chrome.i18n.getMessage('popupPageUnavailable') || 'このページの情報を取得できません';
+    btn.title = i18n.getMessage('popupPageUnavailable') || "Cannot access this page's info";
   }
 
   btn.addEventListener('click', () => {
     if (!pageAvailable) return;
-    void executeCopyAndClose(() =>
-      chrome.runtime.sendMessage({
-        type: 'POPUP_COPY_PAGE',
-        templateId: template.id,
-        tabId: tabId
-      })
+    void executeCopyAndClose(
+      () =>
+        chrome.runtime.sendMessage({
+          type: 'POPUP_COPY_PAGE',
+          templateId: template.id,
+          tabId: tabId
+        }),
+      i18n
     );
   });
 
@@ -157,9 +166,21 @@ async function initializePopup(): Promise<void> {
   const otherSubmenu = document.getElementById('other-formats-list');
   const selectionBtn = document.getElementById('btn-copy-selection') as HTMLButtonElement | null;
 
-  // 非同期取得完了前にちらつきが起きないよう、固定UI要素へ先に多言語ラベルを適用
+  // アクティブタブとストレージ設定（テンプレート・言語）を並列取得
+  const [tabs, storageResult] = await Promise.all([
+    chrome.tabs.query({ active: true, currentWindow: true }),
+    chrome.storage.sync.get({
+      templates: DEFAULT_TEMPLATES,
+      [LANGUAGE_STORAGE_KEY]: 'auto'
+    })
+  ]);
+
+  const i18n = await loadI18nContext(storageResult[LANGUAGE_STORAGE_KEY]);
+  document.documentElement.lang = i18n.htmlLang;
+
+  // 固定 UI 要素へ多言語ラベルを適用
   if (openOptionsBtn) {
-    const openOptionsLabel = chrome.i18n.getMessage('contextMenuOpenOptions') || 'オプションを開く';
+    const openOptionsLabel = i18n.getMessage('contextMenuOpenOptions') || 'Open Options';
     openOptionsBtn.textContent = openOptionsLabel;
     openOptionsBtn.title = openOptionsLabel;
     openOptionsBtn.addEventListener('click', async () => {
@@ -169,7 +190,7 @@ async function initializePopup(): Promise<void> {
   }
 
   if (otherToggleBtn) {
-    const otherLabel = chrome.i18n.getMessage('contextMenuOtherFormatsPage') || 'その他の形式でコピー';
+    const otherLabel = i18n.getMessage('contextMenuOtherFormatsPage') || 'Copy page in other formats...';
     const labelSpan = otherToggleBtn.querySelector('.toggle-label');
     if (labelSpan) {
       labelSpan.textContent = otherLabel;
@@ -180,14 +201,8 @@ async function initializePopup(): Promise<void> {
 
   if (selectionBtn) {
     selectionBtn.textContent =
-      chrome.i18n.getMessage('contextMenuSelection') || '選択範囲をMarkdownとしてコピー';
+      i18n.getMessage('contextMenuSelection') || 'Copy selection as Markdown';
   }
-
-  // アクティブタブとストレージ設定を並列取得
-  const [tabs, storageResult] = await Promise.all([
-    chrome.tabs.query({ active: true, currentWindow: true }),
-    chrome.storage.sync.get({ templates: DEFAULT_TEMPLATES })
-  ]);
 
   const activeTab = tabs[0];
   const pageAvailable = Boolean(activeTab && activeTab.url);
@@ -201,9 +216,9 @@ async function initializePopup(): Promise<void> {
     pinnedContainer.innerHTML = '';
     pinned.forEach((template) => {
       const label =
-        chrome.i18n.getMessage('contextMenuCopyPageAsFormat', [template.name]) ||
-        `${template.name}形式でページのリンクを作成`;
-      const btn = createPageCopyButton(template, label, activeTab?.id, pageAvailable, false);
+        i18n.getMessage('contextMenuCopyPageAsFormat', [template.name]) ||
+        `Copy Page Link as ${template.name}`;
+      const btn = createPageCopyButton(template, label, activeTab?.id, pageAvailable, i18n, false);
       pinnedContainer.appendChild(btn);
     });
   }
@@ -214,7 +229,7 @@ async function initializePopup(): Promise<void> {
       otherSection.hidden = false;
       otherSubmenu.innerHTML = '';
       unpinned.forEach((template) => {
-        const btn = createPageCopyButton(template, template.name, activeTab?.id, pageAvailable, true);
+        const btn = createPageCopyButton(template, template.name, activeTab?.id, pageAvailable, i18n, true);
         otherSubmenu.appendChild(btn);
       });
 
@@ -245,16 +260,18 @@ async function initializePopup(): Promise<void> {
       selectionBtn.disabled = true;
       selectionBtn.dataset.initiallyDisabled = 'true';
       selectionBtn.title =
-        chrome.i18n.getMessage('popupNoSelection') || 'ページ上でテキストが選択されていません';
+        i18n.getMessage('popupNoSelection') || 'No text selected on this page';
     }
 
     selectionBtn.addEventListener('click', () => {
       if (!cachedSelectionMarkdown) return;
-      void executeCopyAndClose(() =>
-        chrome.runtime.sendMessage({
-          type: 'POPUP_COPY_SELECTION',
-          markdown: cachedSelectionMarkdown
-        })
+      void executeCopyAndClose(
+        () =>
+          chrome.runtime.sendMessage({
+            type: 'POPUP_COPY_SELECTION',
+            markdown: cachedSelectionMarkdown
+          }),
+        i18n
       );
     });
   }
@@ -262,7 +279,7 @@ async function initializePopup(): Promise<void> {
   // ページ情報が利用できないタブの場合は案内を表示
   if (!pageAvailable) {
     showStatus(
-      chrome.i18n.getMessage('popupPageUnavailable') || 'このページの情報を取得できません',
+      i18n.getMessage('popupPageUnavailable') || "Cannot access this page's info",
       true
     );
   }
